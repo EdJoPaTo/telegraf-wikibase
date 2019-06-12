@@ -33,7 +33,19 @@ async function macro(
 			}],
 			['Q2', {
 				type: 'item',
-				id: 'Q2'
+				id: 'Q2',
+				labels: {
+					de: 'Erde',
+					en: 'earth'
+				}
+			}],
+			['Q146', {
+				type: 'item',
+				id: 'Q146',
+				labels: {
+					de: 'Hauskatze',
+					en: 'house cat'
+				}
 			}]
 		])
 	});
@@ -94,4 +106,19 @@ test('locale can be set', macro, {}, () => {}, (ctx, t) => {
 test('get reader works', macro, {}, () => {}, (ctx, t) => {
 	const reader = ctx.wb.r('human');
 	t.is(reader.label(), 'Q5');
+});
+
+test('availableLocales', macro, {}, () => {}, (ctx, t) => {
+	t.deepEqual(ctx.wb.availableLocales(), [
+		'de', 'en'
+	]);
+});
+
+test('availableLocales with high standards', macro, {}, () => {}, (ctx, t) => {
+	t.deepEqual(ctx.wb.availableLocales(1.0), []);
+});
+
+test('availableLocales on class itself', macro, {}, () => {}, (_ctx, t) => {
+	const store = new WikidataEntityStore();
+	t.deepEqual(new TelegrafWikibase(store).availableLocales(), []);
 });
