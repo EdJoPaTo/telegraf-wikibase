@@ -1,0 +1,89 @@
+{
+	"name": "telegraf-wikibase",
+	"version": "0.0.0",
+	"description": "",
+	"license": "MIT",
+	"repository": "EdJoPaTo/telegraf-wikibase",
+	"author": {
+		"name": "EdJoPaTo",
+		"email": "edjopato@gmail.com",
+		"url": "edjopato.de"
+	},
+	"engines": {
+		"node": ">=8"
+	},
+	"scripts": {
+		"build": "del dist && tsc",
+		"prepack": "npm run build",
+		"test": "xo && nyc ava"
+	},
+	"main": "dist",
+	"types": "dist",
+	"files": [
+		"dist",
+		"!*.test.*"
+	],
+	"keywords": [
+		"telegraf",
+		"wikibase",
+		"wikidata"
+	],
+	"dependencies": {},
+	"peerDependencies": {
+		"telegraf": "^3.30.1",
+		"wikidata-entity-reader": "^1.0.0",
+		"wikidata-entity-store": "^1.0.0"
+	},
+	"devDependencies": {
+		"@sindresorhus/tsconfig": "^0.4.0",
+		"@types/node": "^12.0.2",
+		"@typescript-eslint/eslint-plugin": "^1.10.2",
+		"@typescript-eslint/parser": "^1.10.2",
+		"ava": "^2.1.0",
+		"del-cli": "^2.0.0",
+		"eslint-config-xo-typescript": "^0.14.0",
+		"nyc": "^14.1.1",
+		"telegraf": "^3.30.1",
+		"ts-node": "^8.0.2",
+		"typescript": "^3.3.3",
+		"wikidata-entity-reader": "^1.0.0",
+		"wikidata-entity-store": "^1.0.0",
+		"xo": "^0.24.0"
+	},
+	"ava": {
+		"babel": false,
+		"compileEnhancements": false,
+		"extensions": [
+			"ts"
+		],
+		"require": [
+			"ts-node/register"
+		]
+	},
+	"nyc": {
+		"extension": [
+			".ts"
+		],
+		"include": [
+			"source"
+		],
+		"exclude": [
+			"**/*.test.ts"
+		],
+		"all": true,
+		"reporter": [
+			"lcov",
+			"text"
+		]
+	},
+	"xo": {
+		"extends": "xo-typescript",
+		"extensions": [
+			"ts"
+		],
+		"rules": {
+			"@typescript-eslint/camelcase": "off",
+			"ava/no-ignored-test-files": "off"
+		}
+	}
+}
