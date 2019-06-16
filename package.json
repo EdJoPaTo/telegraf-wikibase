@@ -1,7 +1,7 @@
 {
 	"name": "telegraf-wikibase",
 	"version": "0.0.0",
-	"description": "",
+	"description": "Telegraf Middleware to use Wikibase entities (like Wikidata ones) in your users language",
 	"license": "MIT",
 	"repository": "EdJoPaTo/telegraf-wikibase",
 	"author": {
