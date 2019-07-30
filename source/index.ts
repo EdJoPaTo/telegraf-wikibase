@@ -34,7 +34,7 @@ export default class TelegrafWikibase {
 		const allEntries = this.store.allEntities();
 
 		const localeProgress = allEntries
-			.reduce((acc: string[], cur) => acc.concat(Object.keys(cur.labels || {})), [])
+			.flatMap(o => Object.keys(o.labels || {}))
 			.reduce((coll: {[key: string]: number}, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
