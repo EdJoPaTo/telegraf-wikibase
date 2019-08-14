@@ -6,7 +6,7 @@ import TelegrafWikibase, {Options, MiddlewareProperty} from '../source';
 
 interface Context {
 	wb: MiddlewareProperty;
-	session: {
+	session?: {
 		__wikibase_language_code?: string;
 	};
 }
@@ -21,7 +21,7 @@ test('can be used as middleware', t => {
 async function macro(
 	t: ExecutionContext,
 	options: Options,
-	pre: (ctx: any) => Promise<void> | void,
+	pre: (ctx: Context) => Promise<void> | void,
 	env: (ctx: Context, t: ExecutionContext) => Promise<void> | void,
 	update: any = {}
 ): Promise<void> {
@@ -87,7 +87,7 @@ test('language is read from ctx.from', macro, {}, () => {}, (ctx, t) => {
 }, {message: {from: {language_code: 'de'}}});
 
 test('language is read from session', macro, {}, ctx => {
-	ctx.session.__wikibase_language_code = 'am';
+	ctx.session!.__wikibase_language_code = 'am';
 }, (ctx, t) => {
 	t.is(ctx.wb.locale(), 'am');
 }, {message: {from: {language_code: 'de'}}});
@@ -100,7 +100,7 @@ test('language does not fail without session', macro, {}, ctx => {
 
 test('locale can be set', macro, {}, () => {}, (ctx, t) => {
 	ctx.wb.locale('de');
-	t.is(ctx.session.__wikibase_language_code, 'de');
+	t.is(ctx.session!.__wikibase_language_code, 'de');
 });
 
 test('get reader works', macro, {}, () => {}, (ctx, t) => {
