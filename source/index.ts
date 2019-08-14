@@ -16,6 +16,8 @@ export interface Options {
 	contextKey?: string;
 }
 
+type Session = {__wikibase_language_code?: string} | undefined;
+
 export default class TelegrafWikibase {
 	private readonly _defaultLanguageCode = 'en';
 
@@ -51,6 +53,12 @@ export default class TelegrafWikibase {
 
 	middleware(): (ctx: any, next: any) => void {
 		return (ctx, next) => {
+			// TODO: generalize the session attribute
+			const session = ctx.session as Session;
+			if (session && !session.__wikibase_language_code && ctx.from) {
+				session.__wikibase_language_code = ctx.from.language_code;
+			}
+
 			const readerFunc: ReaderFunc = key => this._reader(key, this._lang(ctx));
 
 			const middlewareProperty: MiddlewareProperty = {
@@ -59,8 +67,8 @@ export default class TelegrafWikibase {
 				store: this.store,
 				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
 				locale: (languageCode?: string) => {
-					if (languageCode && ctx.session) {
-						ctx.session.__wikibase_language_code = languageCode;
+					if (languageCode && session) {
+						session.__wikibase_language_code = languageCode;
 						return languageCode;
 					}
 
@@ -84,11 +92,12 @@ export default class TelegrafWikibase {
 	 * Get the users language code.
 	 */
 	private _lang(ctx: any): string {
-		let lang;
+		let lang: string | undefined;
 
 		// TODO: generalize the session attribute
-		if (ctx.session) {
-			lang = ctx.session.__wikibase_language_code;
+		const session = ctx.session as Session;
+		if (session) {
+			lang = session.__wikibase_language_code;
 		}
 
 		if (!lang && ctx.from) {

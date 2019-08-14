@@ -86,6 +86,10 @@ test('language is read from ctx.from', macro, {}, () => {}, (ctx, t) => {
 	t.is(ctx.wb.locale(), 'de');
 }, {message: {from: {language_code: 'de'}}});
 
+test('language from ctx.from is saved on session', macro, {}, () => {}, (ctx, t) => {
+	t.is(ctx.session!.__wikibase_language_code, 'de');
+}, {message: {from: {language_code: 'de'}}});
+
 test('language is read from session', macro, {}, ctx => {
 	ctx.session!.__wikibase_language_code = 'am';
 }, (ctx, t) => {
