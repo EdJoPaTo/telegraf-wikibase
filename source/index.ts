@@ -9,7 +9,7 @@ type Session = {__wikibase_language_code?: string} | undefined;
 export interface MiddlewareProperty {
 	allLocaleProgress: () => Dictionary<number>;
 	availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
-	localeProgress: (languageCode?: string) => number;
+	localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => number;
 	locale: (languageCode?: string) => string;
 	r: ReaderFunc;
 	reader: ReaderFunc;
@@ -34,8 +34,9 @@ export default class TelegrafWikibase {
 		}
 	}
 
-	localeProgress(languageCode: string): number {
-		return this.allLocaleProgress()[languageCode] || 0;
+	localeProgress(languageCode: string, useBaseLanguageCode = true): number {
+		const code = useBaseLanguageCode ? languageCode.split('-')[0] : languageCode;
+		return this.allLocaleProgress()[code] || 0;
 	}
 
 	allLocaleProgress(): Dictionary<number> {
@@ -77,7 +78,7 @@ export default class TelegrafWikibase {
 				store: this._store,
 				allLocaleProgress: () => this.allLocaleProgress(),
 				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
-				localeProgress: (languageCode?: string) => this.localeProgress(languageCode || this._lang(ctx)),
+				localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode || this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
 					if (languageCode && session) {
 						session.__wikibase_language_code = languageCode;

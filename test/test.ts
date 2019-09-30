@@ -128,6 +128,14 @@ test('localeProgress available', macro, {}, () => {}, (ctx, t) => {
 	t.is(ctx.wb.localeProgress('de'), 2 / 3);
 });
 
+test('localeProgress available sublanguage', macro, {}, () => {}, (ctx, t) => {
+	t.is(ctx.wb.localeProgress('de-ch'), 2 / 3);
+});
+
+test('localeProgress available sublanguage but dosnt uses base-language', macro, {}, () => {}, (ctx, t) => {
+	t.is(ctx.wb.localeProgress('de-ch', false), 1 / 3);
+});
+
 test('localeProgress unavailable is 0', macro, {}, () => {}, (ctx, t) => {
 	t.is(ctx.wb.localeProgress('am'), 0);
 });
