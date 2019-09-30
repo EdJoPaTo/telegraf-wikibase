@@ -131,6 +131,11 @@ test('localeProgress unavailable is 0', macro, {}, () => {}, (ctx, t) => {
 	t.is(ctx.wb.localeProgress('am'), 0);
 });
 
+test('localeProgress of user', macro, {}, () => {}, (ctx, t) => {
+	t.is(ctx.wb.locale(), 'en', 'sanity check');
+	t.is(ctx.wb.localeProgress(), 2 / 3);
+});
+
 test('allLocaleProgress', macro, {}, () => {}, (ctx, t) => {
 	t.deepEqual(ctx.wb.allLocaleProgress(), {
 		de: 2 / 3,
