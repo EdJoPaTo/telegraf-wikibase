@@ -1,6 +1,7 @@
+import {KeyValueInMemory} from '@edjopato/datastore';
 import Telegraf from 'telegraf';
 import test, {ExecutionContext} from 'ava';
-import WikidataEntityStore from 'wikidata-entity-store';
+import WikidataEntityStore, {EntityEntry} from 'wikidata-entity-store';
 
 import TelegrafWikibase, {Options, MiddlewareProperty} from '../source';
 
@@ -25,29 +26,39 @@ async function macro(
 	env: (ctx: Context, t: ExecutionContext) => Promise<void> | void,
 	update: any = {}
 ): Promise<void> {
+	const entityStore = new KeyValueInMemory<EntityEntry>();
+	entityStore.set('Q5', {
+		entity: {
+			type: 'item',
+			id: 'Q5'
+		},
+		lastUpdate: 0
+	});
+	entityStore.set('Q2', {
+		entity: {
+			type: 'item',
+			id: 'Q2',
+			labels: {
+				de: 'Erde',
+				en: 'earth'
+			}
+		},
+		lastUpdate: 0
+	});
+	entityStore.set('Q146', {
+		entity: {
+			type: 'item',
+			id: 'Q146',
+			labels: {
+				de: 'Hauskatze',
+				en: 'house cat'
+			}
+		},
+		lastUpdate: 0
+	});
+
 	const store = new WikidataEntityStore({
-		entityStore: new Map([
-			['Q5', {
-				type: 'item',
-				id: 'Q5'
-			}],
-			['Q2', {
-				type: 'item',
-				id: 'Q2',
-				labels: {
-					de: 'Erde',
-					en: 'earth'
-				}
-			}],
-			['Q146', {
-				type: 'item',
-				id: 'Q146',
-				labels: {
-					de: 'Hauskatze',
-					en: 'house cat'
-				}
-			}]
-		])
+		entityStore
 	});
 	await store.addResourceKeyDict({human: 'Q5', earth: 'Q2'});
 
