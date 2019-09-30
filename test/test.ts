@@ -134,7 +134,7 @@ test('availableLocales', macro, {}, () => {}, (ctx, t) => {
 });
 
 test('availableLocales with high standards', macro, {}, () => {}, (ctx, t) => {
-	t.deepEqual(ctx.wb.availableLocales(1.0), []);
+	t.deepEqual(ctx.wb.availableLocales(1), []);
 });
 
 test('availableLocales on class itself', macro, {}, () => {}, (_ctx, t) => {

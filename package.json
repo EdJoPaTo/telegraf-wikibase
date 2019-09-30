@@ -76,6 +76,13 @@
 			"ts"
 		],
 		"rules": {
+			"@typescript-eslint/strict-boolean-expressions": "off",
+			"@typescript-eslint/no-unnecessary-condition": [
+				"error",
+				{
+					"ignoreRhs": true
+				}
+			],
 			"@typescript-eslint/camelcase": "off",
 			"ava/no-ignored-test-files": "off"
 		}

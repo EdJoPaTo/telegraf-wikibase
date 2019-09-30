@@ -26,7 +26,7 @@ export default class TelegrafWikibase {
 	private readonly _contextKey: string = 'wb';
 
 	constructor(
-		private readonly store: WikidataEntityStore,
+		private readonly _store: WikidataEntityStore,
 		options: Options = {}
 	) {
 		if (options.contextKey) {
@@ -39,7 +39,7 @@ export default class TelegrafWikibase {
 	}
 
 	allLocaleProgress(): Dictionary<number> {
-		const allEntries = this.store.allEntities();
+		const allEntries = this._store.allEntities();
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels || {}))
 			.reduce((coll: Dictionary<number>, add) => {
@@ -49,7 +49,7 @@ export default class TelegrafWikibase {
 
 				coll[add] += 1 / allEntries.length;
 				return coll;
-			}, {}) as Dictionary<number>;
+			}, {});
 
 		return localeProgress;
 	}
@@ -74,7 +74,7 @@ export default class TelegrafWikibase {
 			const middlewareProperty: MiddlewareProperty = {
 				r: readerFunc,
 				reader: readerFunc,
-				store: this.store,
+				store: this._store,
 				allLocaleProgress: () => this.allLocaleProgress(),
 				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
 				localeProgress: (languageCode: string) => this.localeProgress(languageCode),
@@ -97,7 +97,7 @@ export default class TelegrafWikibase {
 	 * Generate the reader. Set the languageCode as the generated readers default language code.
 	 */
 	private _reader(key: string, languageCode: string): WikidataEntityReader {
-		return new WikidataEntityReader(this.store.entity(key), languageCode);
+		return new WikidataEntityReader(this._store.entity(key), languageCode);
 	}
 
 	/*
