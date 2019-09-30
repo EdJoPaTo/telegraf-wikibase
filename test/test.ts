@@ -40,6 +40,7 @@ async function macro(
 			id: 'Q2',
 			labels: {
 				de: 'Erde',
+				'de-ch': 'Erde',
 				en: 'earth'
 			}
 		},
@@ -139,13 +140,14 @@ test('localeProgress of user', macro, {}, () => {}, (ctx, t) => {
 test('allLocaleProgress', macro, {}, () => {}, (ctx, t) => {
 	t.deepEqual(ctx.wb.allLocaleProgress(), {
 		de: 2 / 3,
+		'de-ch': 1 / 3,
 		en: 2 / 3
 	});
 });
 
 test('availableLocales', macro, {}, () => {}, (ctx, t) => {
 	t.deepEqual(ctx.wb.availableLocales(), [
-		'de', 'en'
+		'de', 'de-ch', 'en'
 	]);
 });
 
