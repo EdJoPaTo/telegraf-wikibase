@@ -7,7 +7,9 @@ type ReaderFunc = KeyFunc<WikidataEntityReader>;
 type Session = {__wikibase_language_code?: string} | undefined;
 
 export interface MiddlewareProperty {
+	allLocaleProgress: () => Dictionary<number>;
 	availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
+	localeProgress: (languageCode: string) => number;
 	locale: (languageCode?: string) => string;
 	r: ReaderFunc;
 	reader: ReaderFunc;
@@ -32,9 +34,12 @@ export default class TelegrafWikibase {
 		}
 	}
 
-	availableLocales(percentageOfLabelsRequired = 0.1): readonly string[] {
-		const allEntries = this.store.allEntities();
+	localeProgress(languageCode: string): number {
+		return this.allLocaleProgress()[languageCode] || 0;
+	}
 
+	allLocaleProgress(): Dictionary<number> {
+		const allEntries = this.store.allEntities();
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels || {}))
 			.reduce((coll: Dictionary<number>, add) => {
@@ -46,6 +51,11 @@ export default class TelegrafWikibase {
 				return coll;
 			}, {}) as Dictionary<number>;
 
+		return localeProgress;
+	}
+
+	availableLocales(percentageOfLabelsRequired = 0.1): readonly string[] {
+		const localeProgress = this.allLocaleProgress();
 		return Object.keys(localeProgress)
 			.filter(o => localeProgress[o] > percentageOfLabelsRequired)
 			.sort((a, b) => a.localeCompare(b));
@@ -65,7 +75,9 @@ export default class TelegrafWikibase {
 				r: readerFunc,
 				reader: readerFunc,
 				store: this.store,
+				allLocaleProgress: () => this.allLocaleProgress(),
 				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
+				localeProgress: (languageCode: string) => this.localeProgress(languageCode),
 				locale: (languageCode?: string) => {
 					if (languageCode && session) {
 						session.__wikibase_language_code = languageCode;

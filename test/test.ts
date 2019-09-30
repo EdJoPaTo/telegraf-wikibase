@@ -112,6 +112,21 @@ test('get reader works', macro, {}, () => {}, (ctx, t) => {
 	t.is(reader.label(), 'Q5');
 });
 
+test('localeProgress available', macro, {}, () => {}, (ctx, t) => {
+	t.is(ctx.wb.localeProgress('de'), 2 / 3);
+});
+
+test('localeProgress unavailable is 0', macro, {}, () => {}, (ctx, t) => {
+	t.is(ctx.wb.localeProgress('am'), 0);
+});
+
+test('allLocaleProgress', macro, {}, () => {}, (ctx, t) => {
+	t.deepEqual(ctx.wb.allLocaleProgress(), {
+		de: 2 / 3,
+		en: 2 / 3
+	});
+});
+
 test('availableLocales', macro, {}, () => {}, (ctx, t) => {
 	t.deepEqual(ctx.wb.availableLocales(), [
 		'de', 'en'
