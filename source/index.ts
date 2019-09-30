@@ -1,8 +1,10 @@
 import WikidataEntityReader from 'wikidata-entity-reader';
 import WikidataEntityStore from 'wikidata-entity-store';
 
+type Dictionary<T> = {[key: string]: T};
 type KeyFunc<Result> = (key: string) => Result;
 type ReaderFunc = KeyFunc<WikidataEntityReader>;
+type Session = {__wikibase_language_code?: string} | undefined;
 
 export interface MiddlewareProperty {
 	availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
@@ -15,8 +17,6 @@ export interface MiddlewareProperty {
 export interface Options {
 	contextKey?: string;
 }
-
-type Session = {__wikibase_language_code?: string} | undefined;
 
 export default class TelegrafWikibase {
 	private readonly _defaultLanguageCode = 'en';
@@ -37,14 +37,14 @@ export default class TelegrafWikibase {
 
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels || {}))
-			.reduce((coll: {[key: string]: number}, add) => {
+			.reduce((coll: Dictionary<number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
 				}
 
 				coll[add] += 1 / allEntries.length;
 				return coll;
-			}, {}) as {[key: string]: number};
+			}, {}) as Dictionary<number>;
 
 		return Object.keys(localeProgress)
 			.filter(o => localeProgress[o] > percentageOfLabelsRequired)
