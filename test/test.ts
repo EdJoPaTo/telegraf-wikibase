@@ -1,21 +1,24 @@
 /* eslint-disable @typescript-eslint/no-empty-function, @typescript-eslint/prefer-readonly-parameter-types */
 
 import {KeyValueInMemory} from '@edjopato/datastore';
-import Telegraf from 'telegraf';
+import Telegraf, {Context as TelegrafContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
 import WikidataEntityStore, {EntityEntry} from 'wikidata-entity-store';
 
 import TelegrafWikibase, {Options, MiddlewareProperty} from '../source';
 
 interface Context {
-	wb: MiddlewareProperty;
+	readonly wb: MiddlewareProperty;
 	session?: {
 		__wikibase_language_code?: string;
 	};
 }
 
+interface ContextWithTelegrafContext extends Context, TelegrafContext {
+}
+
 test('can be used as middleware', t => {
-	const bot = new Telegraf('');
+	const bot = new Telegraf<ContextWithTelegrafContext>('');
 	t.notThrows(() => {
 		bot.use(new TelegrafWikibase(new WikidataEntityStore()).middleware());
 	});

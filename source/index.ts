@@ -3,7 +3,16 @@ import WikidataEntityStore from 'wikidata-entity-store';
 
 type KeyFunc<Result> = (key: string) => Result;
 type ReaderFunc = KeyFunc<WikidataEntityReader>;
-type Session = {__wikibase_language_code?: string} | undefined;
+
+interface MinimalContext {
+	readonly from?: {
+		readonly language_code?: string;
+	};
+
+	readonly session?: {
+		__wikibase_language_code?: string;
+	};
+}
 
 export interface MiddlewareProperty {
 	readonly allLocaleProgress: () => Record<string, number>;
@@ -60,12 +69,10 @@ export default class TelegrafWikibase {
 			.sort((a, b) => a.localeCompare(b));
 	}
 
-	middleware(): (ctx: any, next: () => Promise<void>) => Promise<void> {
+	middleware(): (ctx: MinimalContext, next: () => Promise<void>) => Promise<void> {
 		return async (ctx, next) => {
-			// TODO: generalize the session attribute
-			const session = ctx.session as Session;
-			if (session && !session.__wikibase_language_code && ctx.from) {
-				session.__wikibase_language_code = ctx.from.language_code;
+			if (ctx.session && !ctx.session.__wikibase_language_code && ctx.from?.language_code) {
+				ctx.session.__wikibase_language_code = ctx.from.language_code;
 			}
 
 			const readerFunc: ReaderFunc = key => this._reader(key, this._lang(ctx));
@@ -78,8 +85,8 @@ export default class TelegrafWikibase {
 				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
 				localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
-					if (languageCode && session) {
-						session.__wikibase_language_code = languageCode;
+					if (languageCode && ctx.session) {
+						ctx.session.__wikibase_language_code = languageCode;
 						return languageCode;
 					}
 
@@ -87,7 +94,7 @@ export default class TelegrafWikibase {
 				}
 			};
 
-			ctx[this._contextKey] = middlewareProperty;
+			(ctx as any)[this._contextKey] = middlewareProperty;
 			return next();
 		};
 	}
@@ -102,24 +109,8 @@ export default class TelegrafWikibase {
 	/*
 	 * Get the users language code.
 	 */
-	private _lang(ctx: any): string {
-		let lang: string | undefined;
-
-		// TODO: generalize the session attribute
-		const session = ctx.session as Session;
-		if (session) {
-			lang = session.__wikibase_language_code;
-		}
-
-		if (!lang && ctx.from) {
-			lang = ctx.from.language_code;
-		}
-
-		if (!lang) {
-			lang = this._defaultLanguageCode;
-		}
-
-		return lang;
+	private _lang(ctx: MinimalContext): string {
+		return ctx.session?.__wikibase_language_code ?? ctx.from?.language_code ?? this._defaultLanguageCode;
 	}
 }
 
