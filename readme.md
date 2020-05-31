@@ -20,7 +20,7 @@ General Wikibase support is planned (soon…) and will propably only effect [Wik
 ## Install
 
 ```
-$ npm install telegraf-wikibase telegraf wikidata-entity-reader
+$ npm install telegraf-wikibase telegraf
 ```
 
 
