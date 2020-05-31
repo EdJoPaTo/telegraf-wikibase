@@ -6,31 +6,30 @@ type ReaderFunc = KeyFunc<WikidataEntityReader>;
 type Session = {__wikibase_language_code?: string} | undefined;
 
 export interface MiddlewareProperty {
-	allLocaleProgress: () => Record<string, number>;
-	availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
-	localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => number;
-	locale: (languageCode?: string) => string;
-	r: ReaderFunc;
-	reader: ReaderFunc;
-	store: WikidataEntityStore;
+	readonly allLocaleProgress: () => Record<string, number>;
+	readonly availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
+	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => number;
+	readonly locale: (languageCode?: string) => string;
+	readonly r: ReaderFunc;
+	readonly reader: ReaderFunc;
+	readonly store: WikidataEntityStore;
 }
 
 export interface Options {
-	contextKey?: string;
+	readonly contextKey?: string;
 }
 
 export default class TelegrafWikibase {
-	private readonly _defaultLanguageCode = 'en';
+	private readonly _defaultLanguageCode: string;
 
-	private readonly _contextKey: string = 'wb';
+	private readonly _contextKey: string;
 
 	constructor(
 		private readonly _store: WikidataEntityStore,
 		options: Options = {}
 	) {
-		if (options.contextKey) {
-			this._contextKey = options.contextKey;
-		}
+		this._defaultLanguageCode = 'en';
+		this._contextKey = options.contextKey ?? 'wb';
 	}
 
 	localeProgress(languageCode: string, useBaseLanguageCode = true): number {
@@ -41,7 +40,7 @@ export default class TelegrafWikibase {
 	allLocaleProgress(): Record<string, number> {
 		const allEntries = this._store.allEntities();
 		const localeProgress = allEntries
-			.flatMap(o => Object.keys(o.labels || {}))
+			.flatMap(o => Object.keys(o.labels ?? {}))
 			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
@@ -61,8 +60,8 @@ export default class TelegrafWikibase {
 			.sort((a, b) => a.localeCompare(b));
 	}
 
-	middleware(): (ctx: any, next: any) => void {
-		return (ctx, next) => {
+	middleware(): (ctx: any, next: () => Promise<void>) => Promise<void> {
+		return async (ctx, next) => {
 			// TODO: generalize the session attribute
 			const session = ctx.session as Session;
 			if (session && !session.__wikibase_language_code && ctx.from) {
@@ -77,7 +76,7 @@ export default class TelegrafWikibase {
 				store: this._store,
 				allLocaleProgress: () => this.allLocaleProgress(),
 				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
-				localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode || this._lang(ctx), useBaseLanguageCode),
+				localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
 					if (languageCode && session) {
 						session.__wikibase_language_code = languageCode;

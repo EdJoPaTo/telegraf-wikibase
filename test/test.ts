@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function, @typescript-eslint/prefer-readonly-parameter-types */
+
 import {KeyValueInMemory} from '@edjopato/datastore';
 import Telegraf from 'telegraf';
 import test, {ExecutionContext} from 'ava';
@@ -67,7 +69,7 @@ async function macro(
 	bot.use(async (ctx: any, next) => {
 		ctx.session = {};
 		await pre(ctx);
-		return next && next();
+		return next();
 	});
 
 	bot.use(new TelegrafWikibase(store, options).middleware());
