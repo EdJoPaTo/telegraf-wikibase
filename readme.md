@@ -87,7 +87,6 @@ Still returns the (newly set) languageCode of the user.
 
 ```ts
 async ctx.wb.reader(key: string): Promise<WikidataEntityReader>
-async ctx.wb.r(key: string): Promise<WikidataEntityReader>
 ```
 
 Returns the [`WikidataEntityReader`](https://github.com/EdJoPaTo/wikidata-entity-reader).

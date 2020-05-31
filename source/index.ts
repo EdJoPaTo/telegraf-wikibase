@@ -27,7 +27,6 @@ export interface MiddlewareProperty {
 	readonly availableLocales: (percentageOfLabelsRequired?: number) => Promise<readonly string[]>;
 	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => Promise<number>;
 	readonly locale: (languageCode?: string) => string;
-	readonly r: ReaderFunc;
 	readonly reader: ReaderFunc;
 	readonly preload: (keysOrEntityIds: readonly string[]) => Promise<void>;
 }
@@ -141,11 +140,8 @@ export default class TelegrafWikibase {
 				ctx.session.__wikibase_language_code = ctx.from.language_code;
 			}
 
-			const readerFunc: ReaderFunc = async key => this.reader(key, this._lang(ctx));
-
 			const middlewareProperty: MiddlewareProperty = {
-				r: readerFunc,
-				reader: readerFunc,
+				reader: async key => this.reader(key, this._lang(ctx)),
 				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
 				allLocaleProgress: async () => this.allLocaleProgress(),
 				availableLocales: async (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),

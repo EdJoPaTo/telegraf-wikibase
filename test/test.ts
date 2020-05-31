@@ -112,7 +112,7 @@ test('locale can be set', macro, {}, () => {}, (ctx, t) => {
 });
 
 test('get reader works', macro, {}, () => {}, async (ctx, t) => {
-	const reader = await ctx.wb.r('human');
+	const reader = await ctx.wb.reader('human');
 	t.is(reader.label(), 'Q5');
 });
 
