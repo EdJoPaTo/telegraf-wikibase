@@ -1,8 +1,10 @@
+import {Cache} from '@edjopato/datastore';
+import {EntitySimplified} from 'wikidata-sdk-got/dist/source/wikibase-sdk-types';
+import {getEntitiesSimplified} from 'wikidata-sdk-got';
+import {isEntityId} from 'wikibase-types';
 import WikidataEntityReader from 'wikidata-entity-reader';
-import WikidataEntityStore from 'wikidata-entity-store';
 
-type KeyFunc<Result> = (key: string) => Result;
-type ReaderFunc = KeyFunc<WikidataEntityReader>;
+type ReaderFunc = (keyOrEntityId: string) => Promise<WikidataEntityReader>;
 
 interface MinimalContext {
 	readonly from?: {
@@ -14,14 +16,20 @@ interface MinimalContext {
 	};
 }
 
+type MaybePromise<T> = T | Promise<T>;
+interface Store<T> {
+	readonly get: (key: string) => MaybePromise<T | undefined>;
+	readonly set: (key: string, value: T, ttl?: number) => MaybePromise<unknown>;
+}
+
 export interface MiddlewareProperty {
-	readonly allLocaleProgress: () => Record<string, number>;
-	readonly availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
-	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => number;
+	readonly allLocaleProgress: () => Promise<Record<string, number>>;
+	readonly availableLocales: (percentageOfLabelsRequired?: number) => Promise<readonly string[]>;
+	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => Promise<number>;
 	readonly locale: (languageCode?: string) => string;
 	readonly r: ReaderFunc;
 	readonly reader: ReaderFunc;
-	readonly store: WikidataEntityStore;
+	readonly preload: (keysOrEntityIds: readonly string[]) => Promise<void>;
 }
 
 export interface Options {
@@ -29,27 +37,85 @@ export interface Options {
 }
 
 export default class TelegrafWikibase {
+	private readonly _resourceKeys: Map<string, string> = new Map();
+
+	private readonly _entityCache: Cache<EntitySimplified>;
+
 	private readonly _defaultLanguageCode: string;
 
 	private readonly _contextKey: string;
 
 	constructor(
-		private readonly _store: WikidataEntityStore,
+		store: Store<EntitySimplified> = new Map(),
 		options: Options = {}
 	) {
 		this._defaultLanguageCode = 'en';
 		this._contextKey = options.contextKey ?? 'wb';
+
+		this._entityCache = new Cache({bulkQuery: async ids => getEntitiesSimplified({ids})}, {
+			store,
+			ttl: 2 * 60 * 60 * 1000 // 2 hours
+		});
 	}
 
-	localeProgress(languageCode: string, useBaseLanguageCode = true): number {
+	addResourceKeys(resourceKeys: Readonly<Record<string, string>>): void {
+		for (const key of Object.keys(resourceKeys)) {
+			const newValue = resourceKeys[key];
+			const existingValue = this._resourceKeys.get(key);
+			if (existingValue && existingValue !== newValue) {
+				throw new Error(`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`);
+			}
+
+			this._resourceKeys.set(key, newValue);
+		}
+	}
+
+	entityIdFromKey(keyOrEntityId: string): string {
+		const resourceKeyEntityId = this._resourceKeys.get(keyOrEntityId);
+		if (resourceKeyEntityId) {
+			return resourceKeyEntityId;
+		}
+
+		if (!isEntityId(keyOrEntityId)) {
+			throw new Error(`Argument is neither a resourceKey or an entity id: ${String(keyOrEntityId)}`);
+		}
+
+		return keyOrEntityId;
+	}
+
+	/**
+	 * Generate the reader. Set the languageCode as the generated readers default language code.
+	 */
+	async reader(keyOrEntityId: string, languageCode: string): Promise<WikidataEntityReader> {
+		const entityId = this.entityIdFromKey(keyOrEntityId);
+		const entity = await this._entityCache.get(entityId);
+		return new WikidataEntityReader(entity, languageCode);
+	}
+
+	/**
+	 * Preload a bunch of entities in one run.
+	 * This is more effective than getting a bunch of entities on their own.
+	 * @param keysOrEntityIds keys or entity ids to be preloaded
+	 */
+	async preload(keysOrEntityIds: readonly string[]): Promise<void> {
+		const entityIds = keysOrEntityIds.map(o => this.entityIdFromKey(o));
+		await this._entityCache.getMany(entityIds);
+	}
+
+	async localeProgress(languageCode: string, useBaseLanguageCode = true): Promise<number> {
 		const code = useBaseLanguageCode ? languageCode.split('-')[0] : languageCode;
-		return this.allLocaleProgress()[code] || 0;
+		const progress = await this.allLocaleProgress();
+		return progress[code] || 0;
 	}
 
-	allLocaleProgress(): Record<string, number> {
-		const allEntries = this._store.allEntities();
+	async allLocaleProgress(): Promise<Record<string, number>> {
+		const allResourceKeyEntityIds = [...this._resourceKeys.values()];
+		const all = await this._entityCache.getMany(allResourceKeyEntityIds);
+		const allEntries = Object.values(all);
+
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels ?? {}))
+			// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
 			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
@@ -62,8 +128,8 @@ export default class TelegrafWikibase {
 		return localeProgress;
 	}
 
-	availableLocales(percentageOfLabelsRequired = 0.1): readonly string[] {
-		const localeProgress = this.allLocaleProgress();
+	async availableLocales(percentageOfLabelsRequired = 0.1): Promise<readonly string[]> {
+		const localeProgress = await this.allLocaleProgress();
 		return Object.keys(localeProgress)
 			.filter(o => localeProgress[o] > percentageOfLabelsRequired)
 			.sort((a, b) => a.localeCompare(b));
@@ -75,15 +141,15 @@ export default class TelegrafWikibase {
 				ctx.session.__wikibase_language_code = ctx.from.language_code;
 			}
 
-			const readerFunc: ReaderFunc = key => this._reader(key, this._lang(ctx));
+			const readerFunc: ReaderFunc = async key => this.reader(key, this._lang(ctx));
 
 			const middlewareProperty: MiddlewareProperty = {
 				r: readerFunc,
 				reader: readerFunc,
-				store: this._store,
-				allLocaleProgress: () => this.allLocaleProgress(),
-				availableLocales: (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
-				localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
+				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
+				allLocaleProgress: async () => this.allLocaleProgress(),
+				availableLocales: async (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
+				localeProgress: async (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
 					if (languageCode && ctx.session) {
 						ctx.session.__wikibase_language_code = languageCode;
@@ -97,13 +163,6 @@ export default class TelegrafWikibase {
 			(ctx as any)[this._contextKey] = middlewareProperty;
 			return next();
 		};
-	}
-
-	/**
-	 * Generate the reader. Set the languageCode as the generated readers default language code.
-	 */
-	private _reader(key: string, languageCode: string): WikidataEntityReader {
-		return new WikidataEntityReader(this._store.entity(key), languageCode);
 	}
 
 	/*

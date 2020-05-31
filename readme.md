@@ -20,7 +20,7 @@ General Wikibase support is planned (soon…) and will propably only effect [Wik
 ## Install
 
 ```
-$ npm install telegraf-wikibase telegraf wikidata-entity-store wikidata-entity-reader
+$ npm install telegraf-wikibase telegraf wikidata-entity-reader
 ```
 
 
@@ -28,16 +28,15 @@ $ npm install telegraf-wikibase telegraf wikidata-entity-store wikidata-entity-r
 
 ```js
 const TelegrafWikibase = require('telegraf-wikibase');
-const WikidataEntityStore = require('wikidata-entity-store');
 
-const store = new WikidataEntityStore(…);
-// Check WikidataEntityStore on how to add entities
-store.addResourceKeyDict({human: 'Q5', earth: 'Q2'})
+const twb = new TelegrafWikibase()
+twb.addResourceKeys({human: 'Q5', earth: 'Q2'})
 
-bot.use(new TelegrafWikibase(store))
+bot.use(twb)
 
-bot.command('foo', ctx => {
-	return ctx.reply(`Hey ${ctx.wb.r('human').label()}!`)
+bot.command('foo', async ctx => {
+	const reader = await ctx.wb.r('human')
+	return ctx.reply(`Hey ${reader.label()}!`)
 	// returns 'Hey Human!'; 'Hey Mensch!'; … depending on the users language
 })
 ```
@@ -49,8 +48,8 @@ The middleware adds `.wb` to the Context `ctx`.
 ### Constructor
 
 ```ts
-bot.use(new TelegrafWikibase(store: WikidataEntityStore))
-bot.use(new TelegrafWikibase(store: WikidataEntityStore, options))
+bot.use(new TelegrafWikibase())
+bot.use(new TelegrafWikibase(store: Store<EntitySimplified>, options))
 ```
 
 `store` to access requested resourceKeys or entity ids (Q-Numbers).
@@ -87,18 +86,9 @@ Still returns the (newly set) languageCode of the user.
 #### reader
 
 ```ts
-ctx.wb.reader(key: string): WikidataEntityReader
-ctx.wb.r(key: string): WikidataEntityReader
+async ctx.wb.reader(key: string): Promise<WikidataEntityReader>
+async ctx.wb.r(key: string): Promise<WikidataEntityReader>
 ```
 
 Returns the [`WikidataEntityReader`](https://github.com/EdJoPaTo/wikidata-entity-reader).
 Use it with `.label()`, `.description()` and so on…
-
-#### store
-
-```ts
-ctx.wb.store : WikidataEntityStore
-ctx.wb.store.…
-```
-
-Access the store you supplied with the constructor.

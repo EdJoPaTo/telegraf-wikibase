@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function, @typescript-eslint/prefer-readonly-parameter-types */
 
-import {KeyValueInMemory} from '@edjopato/datastore';
 import Telegraf, {Context as TelegrafContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
-import WikidataEntityStore, {EntityEntry} from 'wikidata-entity-store';
 
 import TelegrafWikibase, {Options, MiddlewareProperty} from '../source';
 
@@ -20,7 +18,7 @@ interface ContextWithTelegrafContext extends Context, TelegrafContext {
 test('can be used as middleware', t => {
 	const bot = new Telegraf<ContextWithTelegrafContext>('');
 	t.notThrows(() => {
-		bot.use(new TelegrafWikibase(new WikidataEntityStore()).middleware());
+		bot.use(new TelegrafWikibase().middleware());
 	});
 });
 
@@ -31,42 +29,28 @@ async function macro(
 	env: (ctx: Context, t: ExecutionContext) => Promise<void> | void,
 	update: any = {}
 ): Promise<void> {
-	const entityStore = new KeyValueInMemory<EntityEntry>();
+	const entityStore = new Map();
 	entityStore.set('Q5', {
-		entity: {
-			type: 'item',
-			id: 'Q5'
-		},
-		lastUpdate: 0
+		type: 'item',
+		id: 'Q5'
 	});
 	entityStore.set('Q2', {
-		entity: {
-			type: 'item',
-			id: 'Q2',
-			labels: {
-				de: 'Erde',
-				'de-ch': 'Erde',
-				en: 'earth'
-			}
-		},
-		lastUpdate: 0
+		type: 'item',
+		id: 'Q2',
+		labels: {
+			de: 'Erde',
+			'de-ch': 'Erde',
+			en: 'earth'
+		}
 	});
 	entityStore.set('Q146', {
-		entity: {
-			type: 'item',
-			id: 'Q146',
-			labels: {
-				de: 'Hauskatze',
-				en: 'house cat'
-			}
-		},
-		lastUpdate: 0
+		type: 'item',
+		id: 'Q146',
+		labels: {
+			de: 'Hauskatze',
+			en: 'house cat'
+		}
 	});
-
-	const store = new WikidataEntityStore({
-		entityStore
-	});
-	await store.addResourceKeyDict({human: 'Q5', earth: 'Q2'});
 
 	const bot = new Telegraf('');
 	bot.use(async (ctx: any, next) => {
@@ -75,7 +59,10 @@ async function macro(
 		return next();
 	});
 
-	bot.use(new TelegrafWikibase(store, options).middleware());
+	const twb = new TelegrafWikibase(entityStore, options);
+	twb.addResourceKeys({human: 'Q5', earth: 'Q2', cat: 'Q146'});
+
+	bot.use(twb.middleware());
 
 	bot.use(async (ctx: any) => {
 		await env(ctx, t);
@@ -124,51 +111,50 @@ test('locale can be set', macro, {}, () => {}, (ctx, t) => {
 	t.is(ctx.session!.__wikibase_language_code, 'de');
 });
 
-test('get reader works', macro, {}, () => {}, (ctx, t) => {
-	const reader = ctx.wb.r('human');
+test('get reader works', macro, {}, () => {}, async (ctx, t) => {
+	const reader = await ctx.wb.r('human');
 	t.is(reader.label(), 'Q5');
 });
 
-test('localeProgress available', macro, {}, () => {}, (ctx, t) => {
-	t.is(ctx.wb.localeProgress('de'), 2 / 3);
+test('localeProgress available', macro, {}, () => {}, async (ctx, t) => {
+	t.is(await ctx.wb.localeProgress('de'), 2 / 3);
 });
 
-test('localeProgress available sublanguage', macro, {}, () => {}, (ctx, t) => {
-	t.is(ctx.wb.localeProgress('de-ch'), 2 / 3);
+test('localeProgress available sublanguage', macro, {}, () => {}, async (ctx, t) => {
+	t.is(await ctx.wb.localeProgress('de-ch'), 2 / 3);
 });
 
-test('localeProgress available sublanguage but dosnt uses base-language', macro, {}, () => {}, (ctx, t) => {
-	t.is(ctx.wb.localeProgress('de-ch', false), 1 / 3);
+test('localeProgress available sublanguage but dosnt uses base-language', macro, {}, () => {}, async (ctx, t) => {
+	t.is(await ctx.wb.localeProgress('de-ch', false), 1 / 3);
 });
 
-test('localeProgress unavailable is 0', macro, {}, () => {}, (ctx, t) => {
-	t.is(ctx.wb.localeProgress('am'), 0);
+test('localeProgress unavailable is 0', macro, {}, () => {}, async (ctx, t) => {
+	t.is(await ctx.wb.localeProgress('am'), 0);
 });
 
-test('localeProgress of user', macro, {}, () => {}, (ctx, t) => {
+test('localeProgress of user', macro, {}, () => {}, async (ctx, t) => {
 	t.is(ctx.wb.locale(), 'en', 'sanity check');
-	t.is(ctx.wb.localeProgress(), 2 / 3);
+	t.is(await ctx.wb.localeProgress(), 2 / 3);
 });
 
-test('allLocaleProgress', macro, {}, () => {}, (ctx, t) => {
-	t.deepEqual(ctx.wb.allLocaleProgress(), {
+test('allLocaleProgress', macro, {}, () => {}, async (ctx, t) => {
+	t.deepEqual(await ctx.wb.allLocaleProgress(), {
 		de: 2 / 3,
 		'de-ch': 1 / 3,
 		en: 2 / 3
 	});
 });
 
-test('availableLocales', macro, {}, () => {}, (ctx, t) => {
-	t.deepEqual(ctx.wb.availableLocales(), [
+test('availableLocales', macro, {}, () => {}, async (ctx, t) => {
+	t.deepEqual(await ctx.wb.availableLocales(), [
 		'de', 'de-ch', 'en'
 	]);
 });
 
-test('availableLocales with high standards', macro, {}, () => {}, (ctx, t) => {
-	t.deepEqual(ctx.wb.availableLocales(1), []);
+test('availableLocales with high standards', macro, {}, () => {}, async (ctx, t) => {
+	t.deepEqual(await ctx.wb.availableLocales(1), []);
 });
 
-test('availableLocales on class itself', macro, {}, () => {}, (_ctx, t) => {
-	const store = new WikidataEntityStore();
-	t.deepEqual(new TelegrafWikibase(store).availableLocales(), []);
+test('availableLocales on class itself', macro, {}, () => {}, async (_ctx, t) => {
+	t.deepEqual(await new TelegrafWikibase().availableLocales(), []);
 });
