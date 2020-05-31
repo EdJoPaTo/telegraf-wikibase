@@ -1,13 +1,12 @@
 import WikidataEntityReader from 'wikidata-entity-reader';
 import WikidataEntityStore from 'wikidata-entity-store';
 
-type Dictionary<T> = {[key: string]: T};
 type KeyFunc<Result> = (key: string) => Result;
 type ReaderFunc = KeyFunc<WikidataEntityReader>;
 type Session = {__wikibase_language_code?: string} | undefined;
 
 export interface MiddlewareProperty {
-	allLocaleProgress: () => Dictionary<number>;
+	allLocaleProgress: () => Record<string, number>;
 	availableLocales: (percentageOfLabelsRequired?: number) => readonly string[];
 	localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => number;
 	locale: (languageCode?: string) => string;
@@ -39,11 +38,11 @@ export default class TelegrafWikibase {
 		return this.allLocaleProgress()[code] || 0;
 	}
 
-	allLocaleProgress(): Dictionary<number> {
+	allLocaleProgress(): Record<string, number> {
 		const allEntries = this._store.allEntities();
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels || {}))
-			.reduce((coll: Dictionary<number>, add) => {
+			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
 				}
