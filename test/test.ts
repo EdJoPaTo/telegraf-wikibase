@@ -3,7 +3,7 @@
 import Telegraf, {Context as TelegrafContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
 
-import TelegrafWikibase, {Options, MiddlewareProperty} from '../source';
+import {TelegrafWikibase, Options, MiddlewareProperty} from '../source';
 
 interface Context {
 	readonly wb: MiddlewareProperty;

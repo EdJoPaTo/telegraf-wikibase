@@ -27,7 +27,7 @@ $ npm install telegraf-wikibase telegraf
 ## Usage
 
 ```js
-const TelegrafWikibase = require('telegraf-wikibase');
+const {TelegrafWikibase} = require('telegraf-wikibase');
 
 const twb = new TelegrafWikibase()
 twb.addResourceKeys({human: 'Q5', earth: 'Q2'})

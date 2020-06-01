@@ -4,6 +4,8 @@ import {getEntitiesSimplified} from 'wikidata-sdk-got';
 import {isEntityId} from 'wikibase-types';
 import WikidataEntityReader from 'wikidata-entity-reader';
 
+export * from './resource-keys';
+
 type ReaderFunc = (keyOrEntityId: string) => Promise<WikidataEntityReader>;
 
 interface MinimalContext {
@@ -35,7 +37,7 @@ export interface Options {
 	readonly contextKey?: string;
 }
 
-export default class TelegrafWikibase {
+export class TelegrafWikibase {
 	private readonly _resourceKeys: Map<string, string> = new Map();
 
 	private readonly _entityCache: Cache<EntitySimplified>;
@@ -168,7 +170,3 @@ export default class TelegrafWikibase {
 		return ctx.session?.__wikibase_language_code ?? ctx.from?.language_code ?? this._defaultLanguageCode;
 	}
 }
-
-// For CommonJS default export support
-module.exports = TelegrafWikibase;
-module.exports.default = TelegrafWikibase;
