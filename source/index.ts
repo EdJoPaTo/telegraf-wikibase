@@ -142,6 +142,8 @@ export class TelegrafWikibase {
 				ctx.session.__wikibase_language_code = ctx.from.language_code;
 			}
 
+			await this.preload([...this._resourceKeys.values()]);
+
 			const middlewareProperty: MiddlewareProperty = {
 				reader: async key => this.reader(key, this._lang(ctx)),
 				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
