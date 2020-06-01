@@ -129,7 +129,7 @@ export class TelegrafWikibase {
 		return localeProgress;
 	}
 
-	async availableLocales(percentageOfLabelsRequired = 0.1): Promise<readonly string[]> {
+	async availableLocales(percentageOfLabelsRequired = 0.5): Promise<readonly string[]> {
 		const localeProgress = await this.allLocaleProgress();
 		return Object.keys(localeProgress)
 			.filter(o => localeProgress[o] > percentageOfLabelsRequired)
@@ -146,7 +146,7 @@ export class TelegrafWikibase {
 				reader: async key => this.reader(key, this._lang(ctx)),
 				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
 				allLocaleProgress: async () => this.allLocaleProgress(),
-				availableLocales: async (percentageOfLabelsRequired = 0.1) => this.availableLocales(percentageOfLabelsRequired),
+				availableLocales: async (percentageOfLabelsRequired = 0.5) => this.availableLocales(percentageOfLabelsRequired),
 				localeProgress: async (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
 					if (languageCode && ctx.session) {

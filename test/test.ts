@@ -147,7 +147,7 @@ test('allLocaleProgress', macro, {}, () => {}, async (ctx, t) => {
 
 test('availableLocales', macro, {}, () => {}, async (ctx, t) => {
 	t.deepEqual(await ctx.wb.availableLocales(), [
-		'de', 'de-ch', 'en'
+		'de', 'en'
 	]);
 });
 
