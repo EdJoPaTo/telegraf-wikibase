@@ -124,7 +124,7 @@ test('localeProgress available sublanguage', macro, {}, () => {}, async (ctx, t)
 	t.is(await ctx.wb.localeProgress('de-ch'), 2 / 3);
 });
 
-test('localeProgress available sublanguage but dosnt uses base-language', macro, {}, () => {}, async (ctx, t) => {
+test('localeProgress available sublanguage but doesnt uses base-language', macro, {}, () => {}, async (ctx, t) => {
 	t.is(await ctx.wb.localeProgress('de-ch', false), 1 / 3);
 });
 
