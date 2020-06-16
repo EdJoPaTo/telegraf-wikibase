@@ -40,6 +40,12 @@ export interface Options {
 	readonly contextKey?: string;
 
 	/**
+	 * Logs when entities are queried as they are not (anymore) in the cache.
+	 * Helps with debugging: When there are a bulk of single queries they could have preloaded first.
+	 */
+	readonly logQueriedEntityIds?: boolean;
+
+	/**
 	 * User Agent which is used to query the items
 	 */
 	readonly userAgent?: string;
@@ -62,6 +68,10 @@ export class TelegrafWikibase {
 		this._contextKey = options.contextKey ?? 'wb';
 
 		this._entityCache = new Cache({bulkQuery: async ids => {
+			if (options.logQueriedEntityIds) {
+				console.log('TelegrafWikibase getEntities', ids.length, ids);
+			}
+
 			return getEntitiesSimplified({ids}, {headers: {'user-agent': options.userAgent ?? 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase'}});
 		}}, {
 			store,
