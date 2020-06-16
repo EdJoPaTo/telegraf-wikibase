@@ -35,6 +35,11 @@ export interface MiddlewareProperty {
 
 export interface Options {
 	readonly contextKey?: string;
+
+	/**
+	 * User Agent which is used to query the items
+	 */
+	readonly userAgent?: string;
 }
 
 export class TelegrafWikibase {
@@ -53,7 +58,9 @@ export class TelegrafWikibase {
 		this._defaultLanguageCode = 'en';
 		this._contextKey = options.contextKey ?? 'wb';
 
-		this._entityCache = new Cache({bulkQuery: async ids => getEntitiesSimplified({ids})}, {
+		this._entityCache = new Cache({bulkQuery: async ids => {
+			return getEntitiesSimplified({ids}, {headers: {'user-agent': options.userAgent ?? 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase'}});
+		}}, {
 			store,
 			ttl: 2 * 60 * 60 * 1000 // 2 hours
 		});
