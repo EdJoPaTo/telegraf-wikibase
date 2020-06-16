@@ -48,7 +48,7 @@
 		"nyc": "^15.0.1",
 		"telegraf": "^3.38.0",
 		"typescript": "^3.3.3",
-		"xo": "^0.30.0"
+		"xo": "^0.32.0"
 	},
 	"nyc": {
 		"extension": [
@@ -69,14 +69,7 @@
 	},
 	"xo": {
 		"rules": {
-			"@typescript-eslint/strict-boolean-expressions": "off",
-			"@typescript-eslint/no-unnecessary-condition": [
-				"error",
-				{
-					"ignoreRhs": true
-				}
-			],
-			"@typescript-eslint/camelcase": "off",
+			"@typescript-eslint/prefer-readonly-parameter-types": "error",
 			"ava/no-ignored-test-files": "off"
 		}
 	}

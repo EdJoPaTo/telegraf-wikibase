@@ -136,7 +136,7 @@ export class TelegrafWikibase {
 
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels ?? {}))
-			// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+			// eslint-disable-next-line unicorn/no-reduce, @typescript-eslint/prefer-readonly-parameter-types
 			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
