@@ -34,6 +34,9 @@ export interface MiddlewareProperty {
 }
 
 export interface Options {
+	/**
+	 * Key under which the MiddlewareProperty can be accessed in the ctx. Defaults to ctx.wb
+	 */
 	readonly contextKey?: string;
 
 	/**
