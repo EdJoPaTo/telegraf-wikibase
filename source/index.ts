@@ -20,6 +20,7 @@ interface MinimalContext {
 
 type MaybePromise<T> = T | Promise<T>;
 interface Store<T> {
+	readonly ttlSupport?: boolean;
 	readonly get: (key: string) => MaybePromise<T | undefined>;
 	readonly set: (key: string, value: T, ttl?: number) => MaybePromise<unknown>;
 }
@@ -73,6 +74,9 @@ export class TelegrafWikibase {
 		this._contextKey = options.contextKey ?? 'wb';
 
 		const store: Store<EntitySimplified> = options.store ?? new TtlKeyValueInMemory();
+		if (!store.ttlSupport) {
+			console.log('TelegrafWikibase', 'consider using a store with ttl support');
+		}
 
 		this._entityCache = new Cache({bulkQuery: async ids => {
 			if (options.logQueriedEntityIds) {

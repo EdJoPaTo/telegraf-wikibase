@@ -30,6 +30,7 @@ async function macro(
 	update: any = {}
 ): Promise<void> {
 	const entityStore = new Map();
+	(entityStore as any).ttlSupport = true;
 	entityStore.set('Q5', {
 		type: 'item',
 		id: 'Q5'
