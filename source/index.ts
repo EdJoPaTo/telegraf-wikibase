@@ -1,4 +1,4 @@
-import {Cache} from '@edjopato/datastore';
+import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
 import {EntitySimplified} from 'wikidata-sdk-got/dist/source/wikibase-sdk-types';
 import {getEntitiesSimplified} from 'wikidata-sdk-got';
 import {isEntityId} from 'wikibase-types';
@@ -46,6 +46,12 @@ export interface Options {
 	readonly logQueriedEntityIds?: boolean;
 
 	/**
+	 * Store object which keeps the entities. Can be used to store more persistent than in memory.
+	 * In order to always use up to date wikidata entities use a store with ttl support.
+	 */
+	readonly store?: Store<EntitySimplified>;
+
+	/**
 	 * User Agent which is used to query the items
 	 */
 	readonly userAgent?: string;
@@ -61,11 +67,12 @@ export class TelegrafWikibase {
 	private readonly _contextKey: string;
 
 	constructor(
-		store: Store<EntitySimplified> = new Map(),
 		options: Options = {}
 	) {
 		this._defaultLanguageCode = 'en';
 		this._contextKey = options.contextKey ?? 'wb';
+
+		const store: Store<EntitySimplified> = options.store ?? new TtlKeyValueInMemory();
 
 		this._entityCache = new Cache({bulkQuery: async ids => {
 			if (options.logQueriedEntityIds) {

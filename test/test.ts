@@ -59,7 +59,7 @@ async function macro(
 		return next();
 	});
 
-	const twb = new TelegrafWikibase(entityStore, options);
+	const twb = new TelegrafWikibase({store: entityStore, ...options});
 	twb.addResourceKeys({human: 'Q5', earth: 'Q2', cat: 'Q146'});
 
 	bot.use(twb.middleware());
