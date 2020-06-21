@@ -138,6 +138,24 @@ export class TelegrafWikibase {
 	}
 
 	/**
+	 * Will update the resource keys regularly so they are always available.
+	 * @param errorHandler Will be called when the updating failed
+	 */
+	async startRegularResourceKeyUpdate(errorHandler?: (error: any) => void | Promise<void>): Promise<NodeJS.Timeout> {
+		await this._entityCache.getMany([...this._resourceKeys.values()], true);
+
+		return setInterval(async () => {
+			try {
+				await this._entityCache.getMany([...this._resourceKeys.values()], true);
+			} catch (error) {
+				if (errorHandler) {
+					await errorHandler(error);
+				}
+			}
+		}, this._ttl * 0.95);
+	}
+
+	/**
 	 * Preload a bunch of entities in one run.
 	 * This is more effective than getting a bunch of entities on their own.
 	 * @param keysOrEntityIds keys or entity ids to be preloaded
