@@ -53,10 +53,19 @@ export interface Options {
 	readonly store?: Store<EntitySimplified>;
 
 	/**
+	 * Time to live of entities within the cache in milliseconds.
+	 * When the time is passed the entity will be removed from the cache.
+	 * When not set this defaults to 6 hours.
+	 */
+	readonly ttl?: number;
+
+	/**
 	 * User Agent which is used to query the items
 	 */
 	readonly userAgent?: string;
 }
+
+const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
 
 export class TelegrafWikibase {
 	private readonly _resourceKeys: Map<string, string> = new Map();
@@ -66,6 +75,8 @@ export class TelegrafWikibase {
 	private readonly _defaultLanguageCode: string;
 
 	private readonly _contextKey: string;
+
+	private readonly _ttl: number;
 
 	constructor(
 		options: Options = {}
@@ -78,6 +89,8 @@ export class TelegrafWikibase {
 			console.log('TelegrafWikibase', 'consider using a store with ttl support');
 		}
 
+		this._ttl = options.ttl ?? DEFAULT_TTL;
+
 		this._entityCache = new Cache({bulkQuery: async ids => {
 			if (options.logQueriedEntityIds) {
 				console.log('TelegrafWikibase getEntities', ids.length, ids);
@@ -86,7 +99,7 @@ export class TelegrafWikibase {
 			return getEntitiesSimplified({ids}, {headers: {'user-agent': options.userAgent ?? 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase'}});
 		}}, {
 			store,
-			ttl: 2 * 60 * 60 * 1000 // 2 hours
+			ttl: this._ttl
 		});
 	}
 
