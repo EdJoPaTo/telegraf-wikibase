@@ -6,8 +6,6 @@ import WikidataEntityReader from 'wikidata-entity-reader';
 
 export * from './resource-keys';
 
-type ReaderFunc = (keyOrEntityId: string) => Promise<WikidataEntityReader>;
-
 interface MinimalContext {
 	readonly from?: {
 		readonly language_code?: string;
@@ -30,7 +28,7 @@ export interface MiddlewareProperty {
 	readonly availableLocales: (percentageOfLabelsRequired?: number) => Promise<readonly string[]>;
 	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => Promise<number>;
 	readonly locale: (languageCode?: string) => string;
-	readonly reader: ReaderFunc;
+	readonly reader: (keyOrEntityId: string, language?: string) => Promise<WikidataEntityReader>;
 	readonly preload: (keysOrEntityIds: readonly string[]) => Promise<void>;
 }
 
@@ -207,7 +205,7 @@ export class TelegrafWikibase {
 			await this.preload([...this._resourceKeys.values()]);
 
 			const middlewareProperty: MiddlewareProperty = {
-				reader: async key => this.reader(key, this._lang(ctx)),
+				reader: async (key, language) => this.reader(key, language ?? this._lang(ctx)),
 				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
 				allLocaleProgress: async () => this.allLocaleProgress(),
 				availableLocales: async (percentageOfLabelsRequired = 0.5) => this.availableLocales(percentageOfLabelsRequired),
