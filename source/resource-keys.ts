@@ -1,5 +1,8 @@
 import {mapToRecord, arrayToRecord} from '@edjopato/datastore';
-import yamlToObjectPathRecord from 'yaml-to-object-path-record';
+import * as yaml from 'js-yaml';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const tableize = require('tableize-object');
 
 export function resourceKeysFromMap(entries: Readonly<ReadonlyMap<string, string>>): Record<string, string> {
 	return mapToRecord(entries);
@@ -10,5 +13,7 @@ export function resourceKeysFromArray(entries: ReadonlyArray<{readonly key: stri
 }
 
 export function resourceKeysFromYaml(yamlString: string): Record<string, string> {
-	return yamlToObjectPathRecord(yamlString);
+	const yamlObject = yaml.safeLoad(yamlString);
+	const dict: Record<string, string> = tableize(yamlObject);
+	return dict;
 }
