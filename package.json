@@ -71,6 +71,17 @@
 		"rules": {
 			"@typescript-eslint/prefer-readonly-parameter-types": "error",
 			"ava/no-ignored-test-files": "off"
-		}
+		},
+		"overrides": [
+			{
+				"files": [
+					"**/*.test.*",
+					"test/**/*.*"
+				],
+				"rules": {
+					"@typescript-eslint/prefer-readonly-parameter-types": "off"
+				}
+			}
+		]
 	}
 }

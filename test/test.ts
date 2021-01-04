@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-function, @typescript-eslint/prefer-readonly-parameter-types */
+/* eslint-disable @typescript-eslint/no-empty-function */
 
 import Telegraf, {Context as TelegrafContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
