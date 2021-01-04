@@ -13,7 +13,7 @@ export function resourceKeysFromArray(entries: ReadonlyArray<{readonly key: stri
 }
 
 export function resourceKeysFromYaml(yamlString: string): Record<string, string> {
-	const yamlObject = yaml.safeLoad(yamlString);
+	const yamlObject = yaml.load(yamlString);
 	const dict: Record<string, string> = tableize(yamlObject);
 	return dict;
 }
