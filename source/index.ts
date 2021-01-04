@@ -138,13 +138,13 @@ export class TelegrafWikibase {
 	 * Will update the resource keys regularly so they are always available.
 	 * @param errorHandler Will be called when the updating failed
 	 */
-	async startRegularResourceKeyUpdate(errorHandler?: (error: any) => void | Promise<void>): Promise<NodeJS.Timeout> {
+	async startRegularResourceKeyUpdate(errorHandler?: (error: unknown) => void | Promise<void>): Promise<NodeJS.Timeout> {
 		await this._entityCache.getMany([...this._resourceKeys.values()], true);
 
 		return setInterval(async () => {
 			try {
 				await this._entityCache.getMany([...this._resourceKeys.values()], true);
-			} catch (error) {
+			} catch (error: unknown) {
 				if (errorHandler) {
 					await errorHandler(error);
 				}
@@ -175,7 +175,7 @@ export class TelegrafWikibase {
 
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels ?? {}))
-			// eslint-disable-next-line unicorn/no-reduce, @typescript-eslint/prefer-readonly-parameter-types
+			// eslint-disable-next-line unicorn/no-array-reduce, @typescript-eslint/prefer-readonly-parameter-types
 			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
