@@ -102,8 +102,7 @@ export class TelegrafWikibase {
 	}
 
 	addResourceKeys(resourceKeys: Readonly<Record<string, string>>): void {
-		for (const key of Object.keys(resourceKeys)) {
-			const newValue = resourceKeys[key];
+		for (const [key, newValue] of Object.entries(resourceKeys)) {
 			const existingValue = this._resourceKeys.get(key);
 			if (existingValue && existingValue !== newValue) {
 				throw new Error(`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`);
@@ -164,9 +163,9 @@ export class TelegrafWikibase {
 	}
 
 	async localeProgress(languageCode: string, useBaseLanguageCode = true): Promise<number> {
-		const code = useBaseLanguageCode ? languageCode.split('-')[0] : languageCode;
+		const code = useBaseLanguageCode ? languageCode.split('-')[0]! : languageCode;
 		const progress = await this.allLocaleProgress();
-		return progress[code] || 0;
+		return progress[code] ?? 0;
 	}
 
 	async allLocaleProgress(): Promise<Record<string, number>> {
@@ -191,8 +190,11 @@ export class TelegrafWikibase {
 
 	async availableLocales(percentageOfLabelsRequired = 0.5): Promise<readonly string[]> {
 		const localeProgress = await this.allLocaleProgress();
-		return Object.keys(localeProgress)
-			.filter(o => localeProgress[o] > percentageOfLabelsRequired)
+		return Object.entries(localeProgress)
+			// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+			.filter(([_locale, progress]) => progress > percentageOfLabelsRequired)
+			// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+			.map(([locale]) => locale)
 			.sort((a, b) => a.localeCompare(b));
 	}
 
