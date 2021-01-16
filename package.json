@@ -37,7 +37,7 @@
 		"wikidata-sdk-got": "^2.0.1"
 	},
 	"peerDependencies": {
-		"telegraf": "^4.0.0"
+		"telegraf": "^3.38.0 || ^4.0.0"
 	},
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^0.8.0",

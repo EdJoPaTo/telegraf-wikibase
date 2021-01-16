@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import Telegraf, {Context as TelegrafContext} from 'telegraf';
+import {Telegraf, Context as TelegrafContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
 
 import {TelegrafWikibase, Options, MiddlewareProperty} from '../source';
@@ -54,6 +54,7 @@ async function macro(
 	});
 
 	const bot = new Telegraf('');
+	bot.telegram.getMe = async () => ({} as any);
 	bot.use(async (ctx: any, next) => {
 		ctx.session = {};
 		await pre(ctx);
