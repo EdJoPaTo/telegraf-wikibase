@@ -5,7 +5,7 @@
 		"test"
 	],
 	"compilerOptions": {
-		"target": "es2019",
+		"module": "CommonJS",
 		"outDir": "dist"
 	}
 }
