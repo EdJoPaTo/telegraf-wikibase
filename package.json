@@ -2,6 +2,11 @@
 	"name": "telegraf-wikibase",
 	"version": "0.10.1",
 	"description": "Telegraf Middleware to use Wikibase entities (like Wikidata ones) in your users language",
+	"keywords": [
+		"telegraf",
+		"wikibase",
+		"wikidata"
+	],
 	"license": "MIT",
 	"repository": "EdJoPaTo/telegraf-wikibase",
 	"author": {
@@ -9,25 +14,14 @@
 		"email": "telegraf-wikibase-npm-package@edjopato.de",
 		"url": "https://edjopato.de"
 	},
-	"engines": {
-		"node": ">=12"
-	},
 	"scripts": {
-		"build": "del dist && tsc",
+		"build": "del-cli dist && tsc",
 		"prepack": "npm run build",
 		"test": "tsc --sourceMap && xo && nyc ava"
 	},
-	"main": "dist/source",
-	"types": "dist/source",
-	"files": [
-		"dist/source",
-		"!*.test.*"
-	],
-	"keywords": [
-		"telegraf",
-		"wikibase",
-		"wikidata"
-	],
+	"engines": {
+		"node": ">=12"
+	},
 	"dependencies": {
 		"@edjopato/datastore": "^0.3.0",
 		"js-yaml": "^4.0.0",
@@ -50,17 +44,13 @@
 		"typescript": "^4.1.3",
 		"xo": "^0.38.1"
 	},
+	"files": [
+		"dist/source",
+		"!*.test.*"
+	],
+	"main": "dist/source",
+	"types": "dist/source",
 	"nyc": {
-		"extension": [
-			".ts"
-		],
-		"include": [
-			"dist/source",
-			"source"
-		],
-		"exclude": [
-			"**/*.test.ts"
-		],
 		"all": true,
 		"reporter": [
 			"lcov",
