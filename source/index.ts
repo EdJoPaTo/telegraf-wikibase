@@ -162,6 +162,7 @@ export class TelegrafWikibase {
 	}
 
 	async localeProgress(languageCode: string, useBaseLanguageCode = true): Promise<number> {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const code = useBaseLanguageCode ? languageCode.split('-')[0]! : languageCode;
 		const progress = await this.allLocaleProgress();
 		return progress[code] ?? 0;

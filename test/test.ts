@@ -57,6 +57,7 @@ async function macro(
 	bot.telegram.getMe = async () => ({} as any);
 	bot.use(async (ctx: any, next) => {
 		ctx.session = {};
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		await pre(ctx);
 		return next();
 	});
@@ -67,9 +68,11 @@ async function macro(
 	bot.use(twb.middleware());
 
 	bot.use(async (ctx: any) => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		await env(ctx, t);
 	});
 
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 	await bot.handleUpdate(update);
 }
 
@@ -93,10 +96,11 @@ test('language is read from ctx.from', macro, {}, () => {}, (ctx, t) => {
 }, {message: {from: {language_code: 'de'}}});
 
 test('language from ctx.from is saved on session', macro, {}, () => {}, (ctx, t) => {
-	t.is(ctx.session!.__wikibase_language_code, 'de');
+	t.is(ctx.session?.__wikibase_language_code, 'de');
 }, {message: {from: {language_code: 'de'}}});
 
 test('language is read from session', macro, {}, ctx => {
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	ctx.session!.__wikibase_language_code = 'am';
 }, (ctx, t) => {
 	t.is(ctx.wb.locale(), 'am');
@@ -110,7 +114,7 @@ test('language does not fail without session', macro, {}, ctx => {
 
 test('locale can be set', macro, {}, () => {}, (ctx, t) => {
 	ctx.wb.locale('de');
-	t.is(ctx.session!.__wikibase_language_code, 'de');
+	t.is(ctx.session?.__wikibase_language_code, 'de');
 });
 
 test('get reader works', macro, {}, () => {}, async (ctx, t) => {
