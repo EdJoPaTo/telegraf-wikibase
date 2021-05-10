@@ -65,7 +65,7 @@ export interface Options {
 const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
 
 export class TelegrafWikibase {
-	private readonly _resourceKeys: Map<string, string> = new Map();
+	private readonly _resourceKeys = new Map<string, string>();
 
 	private readonly _entityCache: Cache<EntitySimplified>;
 
@@ -222,6 +222,7 @@ export class TelegrafWikibase {
 				}
 			};
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 			(ctx as any)[this._contextKey] = middlewareProperty;
 			return next();
 		};

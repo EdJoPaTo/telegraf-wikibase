@@ -1,7 +1,7 @@
 import {mapToRecord, arrayToRecord} from '@edjopato/datastore';
 import * as yaml from 'js-yaml';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, unicorn/prefer-module
 const tableize = require('tableize-object');
 
 export function resourceKeysFromMap(entries: Readonly<ReadonlyMap<string, string>>): Record<string, string> {
