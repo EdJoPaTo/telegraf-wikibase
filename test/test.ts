@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-
 import {Telegraf, Context as TelegrafContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
 
@@ -27,13 +25,13 @@ async function macro(
 	options: Options,
 	pre: (ctx: Context) => Promise<void> | void,
 	env: (ctx: Context, t: ExecutionContext) => Promise<void> | void,
-	update: any = {}
+	update: any = {},
 ): Promise<void> {
 	const entityStore = new Map();
 	(entityStore as any).ttlSupport = true;
 	entityStore.set('Q5', {
 		type: 'item',
-		id: 'Q5'
+		id: 'Q5',
 	});
 	entityStore.set('Q2', {
 		type: 'item',
@@ -41,23 +39,22 @@ async function macro(
 		labels: {
 			de: 'Erde',
 			'de-ch': 'Erde',
-			en: 'earth'
-		}
+			en: 'earth',
+		},
 	});
 	entityStore.set('Q146', {
 		type: 'item',
 		id: 'Q146',
 		labels: {
 			de: 'Hauskatze',
-			en: 'house cat'
-		}
+			en: 'house cat',
+		},
 	});
 
 	const bot = new Telegraf('');
 	bot.telegram.getMe = async () => ({} as any);
 	bot.use(async (ctx: any, next) => {
 		ctx.session = {};
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		await pre(ctx);
 		return next();
 	});
@@ -68,11 +65,9 @@ async function macro(
 	bot.use(twb.middleware());
 
 	bot.use(async (ctx: any) => {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		await env(ctx, t);
 	});
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 	await bot.handleUpdate(update);
 }
 
@@ -81,7 +76,7 @@ test('context has wb object', macro, {}, () => {}, (ctx, t) => {
 });
 
 test('contextKey can be changed', macro, {
-	contextKey: 'wd'
+	contextKey: 'wd',
 }, () => {}, (ctx: any, t) => {
 	t.falsy(ctx.wb);
 	t.truthy(ctx.wd);
@@ -100,7 +95,6 @@ test('language from ctx.from is saved on session', macro, {}, () => {}, (ctx, t)
 }, {message: {from: {language_code: 'de'}}});
 
 test('language is read from session', macro, {}, ctx => {
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	ctx.session!.__wikibase_language_code = 'am';
 }, (ctx, t) => {
 	t.is(ctx.wb.locale(), 'am');
@@ -147,13 +141,13 @@ test('allLocaleProgress', macro, {}, () => {}, async (ctx, t) => {
 	t.deepEqual(await ctx.wb.allLocaleProgress(), {
 		de: 2 / 3,
 		'de-ch': 1 / 3,
-		en: 2 / 3
+		en: 2 / 3,
 	});
 });
 
 test('availableLocales', macro, {}, () => {}, async (ctx, t) => {
 	t.deepEqual(await ctx.wb.availableLocales(), [
-		'de', 'en'
+		'de', 'en',
 	]);
 });
 

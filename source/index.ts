@@ -76,7 +76,7 @@ export class TelegrafWikibase {
 	private readonly _ttl: number;
 
 	constructor(
-		options: Options = {}
+		options: Options = {},
 	) {
 		this._defaultLanguageCode = 'en';
 		this._contextKey = options.contextKey ?? 'wb';
@@ -96,7 +96,7 @@ export class TelegrafWikibase {
 			return getEntitiesSimplified({ids}, {headers: {'user-agent': options.userAgent ?? 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase'}});
 		}}, {
 			store,
-			ttl: this._ttl
+			ttl: this._ttl,
 		});
 	}
 
@@ -162,7 +162,6 @@ export class TelegrafWikibase {
 	}
 
 	async localeProgress(languageCode: string, useBaseLanguageCode = true): Promise<number> {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const code = useBaseLanguageCode ? languageCode.split('-')[0]! : languageCode;
 		const progress = await this.allLocaleProgress();
 		return progress[code] ?? 0;
@@ -219,7 +218,7 @@ export class TelegrafWikibase {
 					}
 
 					return this._lang(ctx);
-				}
+				},
 			};
 
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

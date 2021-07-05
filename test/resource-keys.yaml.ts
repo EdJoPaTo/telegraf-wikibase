@@ -12,7 +12,7 @@ foo: bar
 	`;
 	t.deepEqual(resourceKeysFromYaml(input), {
 		key: 'value',
-		foo: 'bar'
+		foo: 'bar',
 	});
 });
 
@@ -24,7 +24,7 @@ flat: value
 	`;
 	t.deepEqual(resourceKeysFromYaml(input), {
 		'foo.bar': 'test please ignore',
-		flat: 'value'
+		flat: 'value',
 	});
 });
 
