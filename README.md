@@ -3,7 +3,6 @@
 [![NPM Version](https://img.shields.io/npm/v/telegraf-wikibase.svg)](https://www.npmjs.com/package/telegraf-wikibase)
 [![node](https://img.shields.io/node/v/telegraf-wikibase.svg)](https://www.npmjs.com/package/telegraf-wikibase)
 [![Dependency Status](https://david-dm.org/EdJoPaTo/telegraf-wikibase/status.svg)](https://david-dm.org/EdJoPaTo/telegraf-wikibase)
-[![Peer Dependency Status](https://david-dm.org/EdJoPaTo/telegraf-wikibase/peer-status.svg)](https://david-dm.org/EdJoPaTo/telegraf-wikibase?type=peer)
 [![Dev Dependency Status](https://david-dm.org/EdJoPaTo/telegraf-wikibase/dev-status.svg)](https://david-dm.org/EdJoPaTo/telegraf-wikibase?type=dev)
 
 > Telegraf Middleware to use Wikibase entities (like Wikidata ones) in your users language
