@@ -1,4 +1,4 @@
-import {Telegraf, Context as TelegrafContext} from 'telegraf';
+import {Telegraf, Context as BaseContext} from 'telegraf';
 import test, {ExecutionContext} from 'ava';
 
 import {TelegrafWikibase, Options, MiddlewareProperty} from '../source';
@@ -10,11 +10,11 @@ interface Context {
 	};
 }
 
-interface ContextWithTelegrafContext extends Context, TelegrafContext {
+interface MyContext extends Context, BaseContext {
 }
 
 test('can be used as middleware', t => {
-	const bot = new Telegraf<ContextWithTelegrafContext>('');
+	const bot = new Telegraf<MyContext>('123:ABC');
 	t.notThrows(() => {
 		bot.use(new TelegrafWikibase().middleware());
 	});
@@ -51,8 +51,8 @@ async function macro(
 		},
 	});
 
-	const bot = new Telegraf('');
-	bot.telegram.getMe = async () => ({} as any);
+	const bot = new Telegraf('123:ABC');
+	(bot as any).botInfo = {};
 	bot.use(async (ctx: any, next) => {
 		ctx.session = {};
 		await pre(ctx);
