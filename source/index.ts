@@ -1,7 +1,7 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
 import {getEntitiesSimplified, EntitySimplified} from 'wikidata-sdk-got';
 import {isEntityId} from 'wikibase-types';
-import WikidataEntityReader from 'wikidata-entity-reader';
+import {WikibaseEntityReader} from 'wikidata-entity-reader';
 
 export * from './resource-keys';
 
@@ -27,7 +27,7 @@ export interface MiddlewareProperty {
 	readonly availableLocales: (percentageOfLabelsRequired?: number) => Promise<readonly string[]>;
 	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => Promise<number>;
 	readonly locale: (languageCode?: string) => string;
-	readonly reader: (keyOrEntityId: string, language?: string) => Promise<WikidataEntityReader>;
+	readonly reader: (keyOrEntityId: string, language?: string) => Promise<WikibaseEntityReader>;
 	readonly preload: (keysOrEntityIds: readonly string[]) => Promise<void>;
 }
 
@@ -127,17 +127,17 @@ export class TelegrafWikibase {
 	/**
 	 * Generate the reader. Set the languageCode as the generated readers default language code.
 	 */
-	async reader(keyOrEntityId: string, languageCode: string): Promise<WikidataEntityReader> {
+	async reader(keyOrEntityId: string, languageCode: string): Promise<WikibaseEntityReader> {
 		const entityId = this.entityIdFromKey(keyOrEntityId);
 		const entity = await this._entityCache.get(entityId);
-		return new WikidataEntityReader(entity, languageCode);
+		return new WikibaseEntityReader(entity, languageCode);
 	}
 
 	/**
 	 * Will update the resource keys regularly so they are always available.
 	 * @param errorHandler Will be called when the updating failed
 	 */
-	async startRegularResourceKeyUpdate(errorHandler?: (error: unknown) => void | Promise<void>): Promise<NodeJS.Timeout> {
+	async startRegularResourceKeyUpdate(errorHandler?: (error: unknown) => void | Promise<void>): Promise<NodeJS.Timer> {
 		await this._entityCache.getMany([...this._resourceKeys.values()], true);
 
 		return setInterval(async () => {
