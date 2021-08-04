@@ -14,6 +14,7 @@ export function resourceKeysFromArray(entries: ReadonlyArray<{readonly key: stri
 
 export function resourceKeysFromYaml(yamlString: string): Record<string, string> {
 	const yamlObject = yaml.load(yamlString);
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	const dict = tableize(yamlObject) as Record<string, string>;
 	return dict;
 }
