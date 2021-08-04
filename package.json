@@ -1,6 +1,6 @@
 {
 	"name": "telegraf-wikibase",
-	"version": "0.10.2",
+	"version": "0.11.0",
 	"description": "Telegraf Middleware to use Wikibase entities (like Wikidata ones) in your users language",
 	"keywords": [
 		"telegraf",
