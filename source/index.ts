@@ -174,7 +174,7 @@ export class TelegrafWikibase {
 
 		const localeProgress = allEntries
 			.flatMap(o => Object.keys(o.labels ?? {}))
-			// eslint-disable-next-line unicorn/no-array-reduce, @typescript-eslint/prefer-readonly-parameter-types
+			// eslint-disable-next-line unicorn/no-array-reduce, @typescript-eslint/prefer-readonly-parameter-types, unicorn/prefer-object-from-entries
 			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {
 					coll[add] = 0;
