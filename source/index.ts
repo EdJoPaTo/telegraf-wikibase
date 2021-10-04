@@ -221,8 +221,8 @@ export class TelegrafWikibase {
 				},
 			};
 
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			(ctx as any)[this._contextKey] = middlewareProperty;
+			// @ts-expect-error key indexing an interface without key index
+			ctx[this._contextKey] = middlewareProperty;
 			return next();
 		};
 	}
