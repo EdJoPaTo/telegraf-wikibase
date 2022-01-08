@@ -20,13 +20,12 @@ test('can be used as middleware', t => {
 	});
 });
 
-async function macro(
-	t: ExecutionContext,
+const macro = test.macro(async (t,
 	options: Options,
 	pre: (ctx: Context) => Promise<void> | void,
 	env: (ctx: Context, t: ExecutionContext) => Promise<void> | void,
 	update: any = {},
-): Promise<void> {
+) => {
 	const entityStore = new Map();
 	(entityStore as any).ttlSupport = true;
 	entityStore.set('Q5', {
@@ -69,7 +68,7 @@ async function macro(
 	});
 
 	await bot.handleUpdate(update);
-}
+});
 
 test('context has wb object', macro, {}, () => {}, (ctx, t) => {
 	t.truthy(ctx.wb);
