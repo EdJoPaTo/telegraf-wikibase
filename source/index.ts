@@ -88,7 +88,7 @@ export class TelegrafWikibase {
 
 		this._ttl = options.ttl ?? DEFAULT_TTL;
 
-		this._entityCache = new Cache({bulkQuery: async ids => {
+		this._entityCache = new Cache({async bulkQuery(ids) {
 			if (options.logQueriedEntityIds) {
 				console.log('TelegrafWikibase getEntities', ids.length, ids);
 			}

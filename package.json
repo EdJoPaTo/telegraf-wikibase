@@ -42,7 +42,7 @@
 		"nyc": "^15.0.1",
 		"telegraf": "^4.0.0",
 		"typescript": "^4.2.3",
-		"xo": "^0.47.0"
+		"xo": "^0.48.0"
 	},
 	"files": [
 		"dist/source",
@@ -60,7 +60,7 @@
 	"xo": {
 		"rules": {
 			"@typescript-eslint/naming-convention": "off",
-			"@typescript-eslint/prefer-readonly-parameter-types": "error",
+			"@typescript-eslint/prefer-readonly-parameter-types": "warn",
 			"ava/no-ignored-test-files": "off",
 			"import/extensions": [
 				"error",
