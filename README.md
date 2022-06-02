@@ -2,18 +2,14 @@
 
 [![NPM Version](https://img.shields.io/npm/v/telegraf-wikibase.svg)](https://www.npmjs.com/package/telegraf-wikibase)
 [![node](https://img.shields.io/node/v/telegraf-wikibase.svg)](https://www.npmjs.com/package/telegraf-wikibase)
-[![Dependency Status](https://david-dm.org/EdJoPaTo/telegraf-wikibase/status.svg)](https://david-dm.org/EdJoPaTo/telegraf-wikibase)
-[![Dev Dependency Status](https://david-dm.org/EdJoPaTo/telegraf-wikibase/dev-status.svg)](https://david-dm.org/EdJoPaTo/telegraf-wikibase?type=dev)
 
 > Telegraf Middleware to use Wikibase entities (like Wikidata ones) in your users language
 
 This library is inspired by [telegraf-i18n](https://github.com/telegraf/telegraf-i18n) and was made to work with [Wikidata](https://wikidata.org/).
 
-
 HINT: [wikibase-sdk](https://github.com/maxlath/wikibase-sdk) just went from being wikidata-sdk to be usable for wikibase in general.
 As this process is ongoing this library only supports wikidata currently.
 General Wikibase support is planned (soon…) and will propably only effect [WikidataEntityStore](https://github.com/EdJoPaTo/wikidata-entity-store)s interface.
-
 
 ## Install
 
@@ -21,11 +17,10 @@ General Wikibase support is planned (soon…) and will propably only effect [Wik
 $ npm install telegraf-wikibase telegraf
 ```
 
-
 ## Usage
 
 ```js
-const {TelegrafWikibase} = require('telegraf-wikibase');
+import {TelegrafWikibase} from 'telegraf-wikibase';
 
 const twb = new TelegrafWikibase()
 twb.addResourceKeys({human: 'Q5', earth: 'Q2'})
@@ -63,7 +58,6 @@ const options = {
 `contextKey` determines the key where to reach the Context Methods.
 Defaults to wb (`ctx.wb.reader`)
 
-
 ### Context Methods
 
 #### locale
@@ -74,10 +68,10 @@ ctx.wb.locale(): string
 
 Returns the currently set languageCode of the user.
 
-
 ```ts
 ctx.wb.locale(languageCode: string): string
 ```
+
 Set the languageCode to the `ctx.session` of the user.
 Still returns the (newly set) languageCode of the user.
 
