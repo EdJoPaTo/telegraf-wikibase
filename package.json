@@ -28,7 +28,7 @@
 		"@edjopato/datastore": "^0.4.0",
 		"js-yaml": "^4.0.0",
 		"tableize-object": "^0.1.0",
-		"wikibase-types": "^0.2.1",
+		"wikibase-types": "^0.3.0",
 		"wikidata-entity-reader": "^3.0.0",
 		"wikidata-sdk-got": "^2.1.0"
 	},
