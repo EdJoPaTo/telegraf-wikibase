@@ -3,7 +3,7 @@ import {getEntitiesSimplified, EntitySimplified} from 'wikidata-sdk-got';
 import {isEntityId} from 'wikibase-types';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
 
-export * from './resource-keys';
+export * from './resource-keys.js';
 
 interface MinimalContext {
 	readonly from?: {

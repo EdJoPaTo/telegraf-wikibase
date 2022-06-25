@@ -1,5 +1,5 @@
 import test from 'ava';
-import {resourceKeysFromYaml} from '../source/resource-keys';
+import {resourceKeysFromYaml} from '../source/resource-keys.js';
 
 test('empty yaml', t => {
 	t.deepEqual(resourceKeysFromYaml(''), {});

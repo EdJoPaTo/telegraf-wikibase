@@ -1,7 +1,7 @@
 import {Bot, Context as BaseContext} from 'grammy';
 import test, {ExecutionContext} from 'ava';
 
-import {TelegrafWikibase, Options, MiddlewareProperty} from '../source';
+import {TelegrafWikibase, Options, MiddlewareProperty} from '../source/index.js';
 
 interface Context {
 	readonly wb: MiddlewareProperty;
