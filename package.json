@@ -33,7 +33,7 @@
 		"wikidata-sdk-got": "^2.1.0"
 	},
 	"devDependencies": {
-		"@sindresorhus/tsconfig": "^2.0.0",
+		"@sindresorhus/tsconfig": "^3.0.1",
 		"@types/js-yaml": "^4.0.0",
 		"@types/node": "^14.18.21",
 		"ava": "^4.0.0",
