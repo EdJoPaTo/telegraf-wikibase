@@ -25,7 +25,7 @@
 		"node": ">=14"
 	},
 	"dependencies": {
-		"@edjopato/datastore": "^0.4.0",
+		"@edjopato/datastore": "^0.5.0",
 		"js-yaml": "^4.0.0",
 		"tableize-object": "^0.1.0",
 		"wikibase-types": "^0.4.0",
