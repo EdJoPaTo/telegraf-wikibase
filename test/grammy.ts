@@ -1,17 +1,18 @@
-import {Bot, Context as BaseContext} from 'grammy';
-import test, {ExecutionContext} from 'ava';
+import type {Context as BaseContext} from 'grammy';
+import {Bot} from 'grammy';
+import type {ExecutionContext} from 'ava';
+import test from 'ava';
+import {TelegrafWikibase} from '../source/index.js';
+import type {MiddlewareProperty, Options} from '../source/index.js';
 
-import {TelegrafWikibase, Options, MiddlewareProperty} from '../source/index.js';
-
-interface Context {
+type Context = {
 	readonly wb: MiddlewareProperty;
 	session?: {
 		__wikibase_language_code?: string;
 	};
-}
+};
 
-interface MyContext extends Context, BaseContext {
-}
+type MyContext = Context & BaseContext;
 
 test('can be used as middleware', t => {
 	const bot = new Bot<MyContext>('123:ABC');
@@ -133,7 +134,5 @@ test('allLocaleProgress', macro, {}, () => {}, async (ctx, t) => {
 });
 
 test('availableLocales', macro, {}, () => {}, async (ctx, t) => {
-	t.deepEqual(await ctx.wb.availableLocales(), [
-		'de', 'en',
-	]);
+	t.deepEqual(await ctx.wb.availableLocales(), ['de', 'en']);
 });

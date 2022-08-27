@@ -1,11 +1,12 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
-import {getEntitiesSimplified, EntitySimplified} from 'wikidata-sdk-got';
+import {getEntitiesSimplified} from 'wikidata-sdk-got';
 import {isEntityId} from 'wikibase-types';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
+import type {EntitySimplified} from 'wikidata-sdk-got';
 
 export * from './resource-keys.js';
 
-interface MinimalContext {
+type MinimalContext = {
 	readonly from?: {
 		readonly language_code?: string;
 	};
@@ -13,25 +14,25 @@ interface MinimalContext {
 	readonly session?: {
 		__wikibase_language_code?: string;
 	};
-}
+};
 
 type MaybePromise<T> = T | Promise<T>;
-interface Store<T> {
+type Store<T> = {
 	readonly ttlSupport?: boolean;
 	readonly get: (key: string) => MaybePromise<T | undefined>;
 	readonly set: (key: string, value: T, ttl?: number) => MaybePromise<unknown>;
-}
+};
 
-export interface MiddlewareProperty {
+export type MiddlewareProperty = {
 	readonly allLocaleProgress: () => Promise<Record<string, number>>;
 	readonly availableLocales: (percentageOfLabelsRequired?: number) => Promise<readonly string[]>;
 	readonly localeProgress: (languageCode?: string, useBaseLanguageCode?: boolean) => Promise<number>;
 	readonly locale: (languageCode?: string) => string;
 	readonly reader: (keyOrEntityId: string, language?: string) => Promise<WikibaseEntityReader>;
 	readonly preload: (keysOrEntityIds: readonly string[]) => Promise<void>;
-}
+};
 
-export interface Options {
+export type Options = {
 	/**
 	 * Key under which the MiddlewareProperty can be accessed in the ctx. Defaults to ctx.wb
 	 */
@@ -60,9 +61,10 @@ export interface Options {
 	 * User Agent which is used to query the items
 	 */
 	readonly userAgent?: string;
-}
+};
 
 const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
+const DEFAULT_USER_AGENT = 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase';
 
 export class TelegrafWikibase {
 	private readonly _resourceKeys = new Map<string, string>();
@@ -83,18 +85,26 @@ export class TelegrafWikibase {
 
 		const store: Store<EntitySimplified> = options.store ?? new TtlKeyValueInMemory();
 		if (!store.ttlSupport) {
-			console.log('TelegrafWikibase', 'consider using a store with ttl support');
+			console.log(
+				'TelegrafWikibase consider using a store with ttl support',
+			);
 		}
 
 		this._ttl = options.ttl ?? DEFAULT_TTL;
 
-		this._entityCache = new Cache({async bulkQuery(ids) {
-			if (options.logQueriedEntityIds) {
-				console.log('TelegrafWikibase getEntities', ids.length, ids);
-			}
+		this._entityCache = new Cache({
+			async bulkQuery(ids) {
+				if (options.logQueriedEntityIds) {
+					console.log('TelegrafWikibase getEntities', ids.length, ids);
+				}
 
-			return getEntitiesSimplified({ids}, {headers: {'user-agent': options.userAgent ?? 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase'}});
-		}}, {
+				return getEntitiesSimplified({ids}, {
+					headers: {
+						'user-agent': options.userAgent ?? DEFAULT_USER_AGENT,
+					},
+				});
+			},
+		}, {
 			store,
 			ttl: this._ttl,
 		});
@@ -104,7 +114,9 @@ export class TelegrafWikibase {
 		for (const [key, newValue] of Object.entries(resourceKeys)) {
 			const existingValue = this._resourceKeys.get(key);
 			if (existingValue && existingValue !== newValue) {
-				throw new Error(`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`);
+				throw new Error(
+					`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`,
+				);
 			}
 
 			this._resourceKeys.set(key, newValue);
@@ -118,7 +130,9 @@ export class TelegrafWikibase {
 		}
 
 		if (!isEntityId(keyOrEntityId)) {
-			throw new Error(`Argument is neither a resourceKey or an entity id: ${String(keyOrEntityId)}`);
+			throw new Error(
+				'Argument is neither a resourceKey or an entity id: ' + String(keyOrEntityId),
+			);
 		}
 
 		return keyOrEntityId;
@@ -127,7 +141,10 @@ export class TelegrafWikibase {
 	/**
 	 * Generate the reader. Set the languageCode as the generated readers default language code.
 	 */
-	async reader(keyOrEntityId: string, languageCode: string): Promise<WikibaseEntityReader> {
+	async reader(
+		keyOrEntityId: string,
+		languageCode: string,
+	): Promise<WikibaseEntityReader> {
 		const entityId = this.entityIdFromKey(keyOrEntityId);
 		const entity = await this._entityCache.get(entityId);
 		return new WikibaseEntityReader(entity, languageCode);
@@ -137,7 +154,9 @@ export class TelegrafWikibase {
 	 * Will update the resource keys regularly so they are always available.
 	 * @param errorHandler Will be called when the updating failed
 	 */
-	async startRegularResourceKeyUpdate(errorHandler?: (error: unknown) => void | Promise<void>): Promise<NodeJS.Timer> {
+	async startRegularResourceKeyUpdate(
+		errorHandler?: (error: unknown) => void | Promise<void>,
+	): Promise<NodeJS.Timer> {
 		await this._entityCache.getMany([...this._resourceKeys.values()], true);
 
 		return setInterval(async () => {
@@ -161,8 +180,13 @@ export class TelegrafWikibase {
 		await this._entityCache.getMany(entityIds);
 	}
 
-	async localeProgress(languageCode: string, useBaseLanguageCode = true): Promise<number> {
-		const code = useBaseLanguageCode ? languageCode.split('-')[0]! : languageCode;
+	async localeProgress(
+		languageCode: string,
+		useBaseLanguageCode = true,
+	): Promise<number> {
+		const code = useBaseLanguageCode
+			? languageCode.split('-')[0]!
+			: languageCode;
 		const progress = await this.allLocaleProgress();
 		return progress[code] ?? 0;
 	}
@@ -187,7 +211,9 @@ export class TelegrafWikibase {
 		return localeProgress;
 	}
 
-	async availableLocales(percentageOfLabelsRequired = 0.5): Promise<readonly string[]> {
+	async availableLocales(
+		percentageOfLabelsRequired = 0.5,
+	): Promise<readonly string[]> {
 		const localeProgress = await this.allLocaleProgress();
 		return Object.entries(localeProgress)
 			// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
@@ -197,7 +223,10 @@ export class TelegrafWikibase {
 			.sort((a, b) => a.localeCompare(b));
 	}
 
-	middleware(): (ctx: MinimalContext, next: () => Promise<void>) => Promise<void> {
+	middleware(): (
+		ctx: MinimalContext,
+		next: () => Promise<void>,
+	) => Promise<void> {
 		return async (ctx, next) => {
 			if (ctx.session && !ctx.session.__wikibase_language_code && ctx.from?.language_code) {
 				ctx.session.__wikibase_language_code = ctx.from.language_code;
@@ -231,6 +260,8 @@ export class TelegrafWikibase {
 	 * Get the users language code.
 	 */
 	private _lang(ctx: MinimalContext): string {
-		return ctx.session?.__wikibase_language_code ?? ctx.from?.language_code ?? this._defaultLanguageCode;
+		return ctx.session?.__wikibase_language_code
+			?? ctx.from?.language_code
+			?? this._defaultLanguageCode;
 	}
 }
