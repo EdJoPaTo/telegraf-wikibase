@@ -16,8 +16,6 @@ jobs:
       matrix:
         node-version:
           - 18
-          - 16
-          - 14
     steps:
       - uses: actions/setup-node@v3
         with:

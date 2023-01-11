@@ -1,8 +1,8 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
-import {getEntitiesSimplified} from 'wikidata-sdk-got';
 import {isEntityId} from 'wikibase-types';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
-import type {EntitySimplified} from 'wikidata-sdk-got';
+
+import {type EntitySimplified, getEntitiesSimplified} from './wdk.js';
 
 export * from './resource-keys.js';
 
@@ -92,17 +92,16 @@ export class TelegrafWikibase {
 
 		this._ttl = options.ttl ?? DEFAULT_TTL;
 
+		const headers = new Headers();
+		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
+
 		this._entityCache = new Cache({
 			async bulkQuery(ids) {
 				if (options.logQueriedEntityIds) {
 					console.log('TelegrafWikibase getEntities', ids.length, ids);
 				}
 
-				return getEntitiesSimplified({ids}, {
-					headers: {
-						'user-agent': options.userAgent ?? DEFAULT_USER_AGENT,
-					},
-				});
+				return getEntitiesSimplified({ids}, {headers});
 			},
 		}, {
 			store,
@@ -239,7 +238,8 @@ export class TelegrafWikibase {
 				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
 				allLocaleProgress: async () => this.allLocaleProgress(),
 				availableLocales: async (percentageOfLabelsRequired = 0.5) => this.availableLocales(percentageOfLabelsRequired),
-				localeProgress: async (languageCode?: string, useBaseLanguageCode?: boolean) => this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
+				localeProgress: async (languageCode?: string, useBaseLanguageCode?: boolean) =>
+					this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
 					if (languageCode && ctx.session) {
 						ctx.session.__wikibase_language_code = languageCode;
