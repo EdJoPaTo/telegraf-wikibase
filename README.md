@@ -7,9 +7,9 @@
 
 This library is inspired by [telegraf-i18n](https://github.com/telegraf/telegraf-i18n) and was made to work with [Wikidata](https://wikidata.org/).
 
-HINT: [wikibase-sdk](https://github.com/maxlath/wikibase-sdk) just went from being wikidata-sdk to be usable for wikibase in general.
-As this process is ongoing this library only supports wikidata currently.
-General Wikibase support is planned (soon…) and will propably only effect [WikidataEntityStore](https://github.com/EdJoPaTo/wikidata-entity-store)s interface.
+HINT: [wikibase-sdk](https://github.com/maxlath/wikibase-sdk) just went from being wikidata-sdk to be usable for Wikibase in general.
+As this process is ongoing this library only supports Wikidata currently.
+General Wikibase support is wished for but not worked on currently. (Feel free to create a Pull Request.)
 
 ## Install
 

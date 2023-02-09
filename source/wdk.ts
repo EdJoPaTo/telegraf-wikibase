@@ -1,7 +1,9 @@
-import {type Entity} from 'wikibase-types';
 import {arrayFilterUnique} from 'array-filter-unique';
-// @ts-expect-error there are no types
-import wdk from 'wikidata-sdk';
+// eslint-disable-next-line n/file-extension-in-import
+import {wdk} from 'wikibase-sdk/wikidata.org';
+import type {Entity} from 'wikibase-types';
+
+type Wbk = typeof wdk;
 
 export declare type Property =
 	| 'info'
@@ -12,13 +14,7 @@ export declare type Property =
 	| 'descriptions'
 	| 'claims'
 	| 'datatype';
-export declare type UrlResultFormat = 'json';
-export type GetEntitiesOptions = {
-	readonly ids: string | readonly string[];
-	readonly languages?: string | readonly string[];
-	readonly props?: Property | readonly Property[];
-	readonly format?: UrlResultFormat;
-};
+export type GetManyEntitiesOptions = Readonly<Parameters<Wbk['getManyEntities']>[0]>;
 export declare type ClaimSimplified = unknown;
 export type EntitySimplified = {
 	readonly type: string;
@@ -32,20 +28,14 @@ export type EntitySimplified = {
 };
 
 export async function getEntities(
-	options: GetEntitiesOptions,
+	options: GetManyEntitiesOptions,
 	fetchOptions: RequestInit = {},
 ): Promise<Record<string, Entity>> {
-	const allIds = Array.isArray(options.ids) ? options.ids : [options.ids];
-	const ids = allIds.filter(arrayFilterUnique());
-
-	const saneOptions: GetEntitiesOptions = {
+	const urls = wdk.getManyEntities({
 		...options,
 		format: 'json',
-		ids,
-	};
-
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-	const urls = wdk.getManyEntities(saneOptions) as readonly string[];
+		ids: options.ids.filter(arrayFilterUnique()),
+	});
 	const entityDictionaryArray = await Promise.all(
 		urls.map(async o => {
 			const response = await fetch(o, fetchOptions);
@@ -65,10 +55,9 @@ export async function getEntities(
 }
 
 export async function getEntitiesSimplified(
-	options: GetEntitiesOptions,
+	options: GetManyEntitiesOptions,
 	fetchOptions: RequestInit = {},
 ): Promise<Record<string, EntitySimplified>> {
 	const entities = await getEntities(options, fetchOptions);
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	return wdk.simplify.entities(entities) as Record<string, EntitySimplified>;
 }

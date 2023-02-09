@@ -29,9 +29,9 @@
 		"array-filter-unique": "^3.0.2",
 		"js-yaml": "^4.0.0",
 		"tableize-object": "^0.1.0",
+		"wikibase-sdk": "^9.0.3",
 		"wikibase-types": "^0.4.0",
-		"wikidata-entity-reader": "^3.0.0",
-		"wikidata-sdk": "^8.1.1"
+		"wikidata-entity-reader": "^3.0.0"
 	},
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^3.0.1",

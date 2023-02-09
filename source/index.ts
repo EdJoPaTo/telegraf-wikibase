@@ -101,7 +101,7 @@ export class TelegrafWikibase {
 					console.log('TelegrafWikibase getEntities', ids.length, ids);
 				}
 
-				return getEntitiesSimplified({ids}, {headers});
+				return getEntitiesSimplified({ids: [...ids]}, {headers});
 			},
 		}, {
 			store,
@@ -234,10 +234,13 @@ export class TelegrafWikibase {
 			await this.preload([...this._resourceKeys.values()]);
 
 			const middlewareProperty: MiddlewareProperty = {
-				reader: async (key, language) => this.reader(key, language ?? this._lang(ctx)),
-				preload: async (keysOrEntityIds: readonly string[]) => this.preload(keysOrEntityIds),
+				reader: async (key, language) =>
+					this.reader(key, language ?? this._lang(ctx)),
+				preload: async (keysOrEntityIds: readonly string[]) =>
+					this.preload(keysOrEntityIds),
 				allLocaleProgress: async () => this.allLocaleProgress(),
-				availableLocales: async (percentageOfLabelsRequired = 0.5) => this.availableLocales(percentageOfLabelsRequired),
+				availableLocales: async (percentageOfLabelsRequired = 0.5) =>
+					this.availableLocales(percentageOfLabelsRequired),
 				localeProgress: async (languageCode?: string, useBaseLanguageCode?: boolean) =>
 					this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
 				locale: (languageCode?: string) => {
