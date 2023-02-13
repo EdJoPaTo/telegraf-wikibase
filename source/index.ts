@@ -4,6 +4,8 @@ import {WikibaseEntityReader} from 'wikidata-entity-reader';
 
 import {type EntitySimplified, getEntitiesSimplified} from './wdk.js';
 
+export type {WikibaseEntityReader} from 'wikidata-entity-reader';
+
 export * from './resource-keys.js';
 
 type MinimalContext = {
