@@ -1,4 +1,3 @@
-import {arrayToRecord, mapToRecord} from '@edjopato/datastore';
 import * as yaml from 'js-yaml';
 // @ts-expect-error there are no types
 import tableize from 'tableize-object';
@@ -6,13 +5,14 @@ import tableize from 'tableize-object';
 export function resourceKeysFromMap(
 	entries: Readonly<ReadonlyMap<string, string>>,
 ): Record<string, string> {
-	return mapToRecord(entries);
+	return Object.fromEntries(entries.entries());
 }
 
 export function resourceKeysFromArray(
 	entries: ReadonlyArray<{readonly key: string; readonly value: string}>,
 ): Record<string, string> {
-	return arrayToRecord(entries);
+	const arrified = entries.map(({key, value}) => [key, value] as const);
+	return Object.fromEntries(arrified);
 }
 
 export function resourceKeysFromYaml(

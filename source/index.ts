@@ -1,8 +1,8 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
-import {isEntityId} from 'wikibase-types';
+import {isEntityId} from 'wikibase-sdk';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
 
-import {type EntitySimplified, getEntitiesSimplified} from './wdk.js';
+import {type EntityId, type EntitySimplified, getEntitiesSimplified} from './wdk.js';
 
 export type {WikibaseEntityReader} from 'wikidata-entity-reader';
 
@@ -69,9 +69,9 @@ const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
 const DEFAULT_USER_AGENT = 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase';
 
 export class TelegrafWikibase {
-	private readonly _resourceKeys = new Map<string, string>();
+	private readonly _resourceKeys = new Map<string, EntityId>();
 
-	private readonly _entityCache: Cache<EntitySimplified>;
+	private readonly _entityCache: Cache<EntityId, EntitySimplified>;
 
 	private readonly _defaultLanguageCode: string;
 
@@ -97,7 +97,7 @@ export class TelegrafWikibase {
 		const headers = new Headers();
 		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
 
-		this._entityCache = new Cache({
+		this._entityCache = new Cache<EntityId, EntitySimplified>({
 			async bulkQuery(ids) {
 				if (options.logQueriedEntityIds) {
 					console.log('TelegrafWikibase getEntities', ids.length, ids);
@@ -111,7 +111,7 @@ export class TelegrafWikibase {
 		});
 	}
 
-	addResourceKeys(resourceKeys: Readonly<Record<string, string>>): void {
+	addResourceKeys(resourceKeys: Readonly<Record<string, EntityId>>): void {
 		for (const [key, newValue] of Object.entries(resourceKeys)) {
 			const existingValue = this._resourceKeys.get(key);
 			if (existingValue && existingValue !== newValue) {
@@ -124,7 +124,7 @@ export class TelegrafWikibase {
 		}
 	}
 
-	entityIdFromKey(keyOrEntityId: string): string {
+	entityIdFromKey(keyOrEntityId: string): EntityId {
 		const resourceKeyEntityId = this._resourceKeys.get(keyOrEntityId);
 		if (resourceKeyEntityId) {
 			return resourceKeyEntityId;

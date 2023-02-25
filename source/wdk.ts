@@ -1,24 +1,17 @@
 import {arrayFilterUnique} from 'array-filter-unique';
+import {simplify} from 'wikibase-sdk';
 // eslint-disable-next-line n/file-extension-in-import
 import {wdk} from 'wikibase-sdk/wikidata.org';
 import type {Entity} from 'wikibase-types';
 
 type Wbk = typeof wdk;
 
-export declare type Property =
-	| 'info'
-	| 'sitelinks'
-	| 'sitelinks/urls'
-	| 'aliases'
-	| 'labels'
-	| 'descriptions'
-	| 'claims'
-	| 'datatype';
 export type GetManyEntitiesOptions = Readonly<Parameters<Wbk['getManyEntities']>[0]>;
+export type EntityId = GetManyEntitiesOptions['ids'][number];
 export declare type ClaimSimplified = unknown;
 export type EntitySimplified = {
 	readonly type: string;
-	readonly id: string;
+	readonly id: EntityId;
 	readonly modified?: string;
 	readonly aliases?: Readonly<Record<string, readonly string[]>>;
 	readonly claims?: Readonly<Record<string, readonly ClaimSimplified[]>>;
@@ -44,14 +37,9 @@ export async function getEntities(
 		}),
 	);
 
-	const entities: Record<string, Entity> = {};
-	for (const entry of entityDictionaryArray) {
-		for (const [key, value] of Object.entries(entry)) {
-			entities[key] = value;
-		}
-	}
-
-	return entities;
+	return Object.fromEntries(
+		entityDictionaryArray.flatMap(o => Object.entries(o)),
+	);
 }
 
 export async function getEntitiesSimplified(
@@ -59,5 +47,7 @@ export async function getEntitiesSimplified(
 	fetchOptions: RequestInit = {},
 ): Promise<Record<string, EntitySimplified>> {
 	const entities = await getEntities(options, fetchOptions);
-	return wdk.simplify.entities(entities) as Record<string, EntitySimplified>;
+	// @ts-expect-error typings are missing currently for simplify.entities
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+	return simplify.entities(entities) as Record<string, EntitySimplified>;
 }
