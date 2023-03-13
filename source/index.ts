@@ -1,8 +1,8 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
-import {isEntityId} from 'wikibase-sdk';
+import {isEntityId, type EntityId, type SimplifiedEntity} from 'wikibase-sdk';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
 
-import {type EntityId, type EntitySimplified, getEntitiesSimplified} from './wdk.js';
+import {getEntitiesSimplified} from './wdk.js';
 
 export type {WikibaseEntityReader} from 'wikidata-entity-reader';
 
@@ -50,7 +50,7 @@ export type Options = {
 	 * Store object which keeps the entities. Can be used to store more persistent than in memory.
 	 * In order to always use up to date wikidata entities use a store with ttl support.
 	 */
-	readonly store?: Store<EntitySimplified>;
+	readonly store?: Store<SimplifiedEntity>;
 
 	/**
 	 * Time to live of entities within the cache in milliseconds.
@@ -71,7 +71,7 @@ const DEFAULT_USER_AGENT = 'some unspecified project depending on github.com/EdJ
 export class TelegrafWikibase {
 	private readonly _resourceKeys = new Map<string, EntityId>();
 
-	private readonly _entityCache: Cache<EntityId, EntitySimplified>;
+	private readonly _entityCache: Cache<EntityId, SimplifiedEntity>;
 
 	private readonly _defaultLanguageCode: string;
 
@@ -85,7 +85,7 @@ export class TelegrafWikibase {
 		this._defaultLanguageCode = 'en';
 		this._contextKey = options.contextKey ?? 'wb';
 
-		const store: Store<EntitySimplified> = options.store ?? new TtlKeyValueInMemory();
+		const store: Store<SimplifiedEntity> = options.store ?? new TtlKeyValueInMemory();
 		if (!store.ttlSupport) {
 			console.log(
 				'TelegrafWikibase consider using a store with ttl support',
@@ -97,7 +97,7 @@ export class TelegrafWikibase {
 		const headers = new Headers();
 		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
 
-		this._entityCache = new Cache<EntityId, EntitySimplified>({
+		this._entityCache = new Cache<EntityId, SimplifiedEntity>({
 			async bulkQuery(ids) {
 				if (options.logQueriedEntityIds) {
 					console.log('TelegrafWikibase getEntities', ids.length, ids);
@@ -198,7 +198,7 @@ export class TelegrafWikibase {
 		const allEntries = Object.values(all);
 
 		const localeProgress = allEntries
-			.flatMap(o => Object.keys(o.labels ?? {}))
+			.flatMap(o => Object.keys(('labels' in o && o.labels) ?? {}))
 			// eslint-disable-next-line unicorn/no-array-reduce, @typescript-eslint/prefer-readonly-parameter-types
 			.reduce((coll: Record<string, number>, add) => {
 				if (!coll[add]) {

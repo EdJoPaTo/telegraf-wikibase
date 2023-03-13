@@ -29,8 +29,7 @@
 		"array-filter-unique": "^3.0.2",
 		"js-yaml": "^4.0.0",
 		"tableize-object": "^0.1.0",
-		"wikibase-sdk": "^9.0.4",
-		"wikibase-types": "^0.4.0",
+		"wikibase-sdk": "^9.0.5",
 		"wikidata-entity-reader": "^3.0.0"
 	},
 	"devDependencies": {
