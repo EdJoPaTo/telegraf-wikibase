@@ -9,7 +9,10 @@
 		"wikidata"
 	],
 	"license": "MIT",
-	"repository": "EdJoPaTo/telegraf-wikibase",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/EdJoPaTo/telegraf-wikibase.git"
+	},
 	"author": {
 		"name": "EdJoPaTo",
 		"email": "telegraf-wikibase-npm-package@edjopato.de",
