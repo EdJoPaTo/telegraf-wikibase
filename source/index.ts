@@ -1,7 +1,6 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
 import {isEntityId, type EntityId, type SimplifiedEntity} from 'wikibase-sdk';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
-
 import {getEntitiesSimplified} from './wdk.js';
 
 export type {WikibaseEntityReader} from 'wikidata-entity-reader';

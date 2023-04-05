@@ -1,9 +1,7 @@
-import type {Context as BaseContext} from 'grammy';
-import {Bot} from 'grammy';
-import type {ExecutionContext} from 'ava';
-import test from 'ava';
-import {TelegrafWikibase} from '../source/index.js';
-import type {MiddlewareProperty, Options} from '../source/index.js';
+import {Bot, type Context as BaseContext} from 'grammy';
+import test, {type ExecutionContext} from 'ava';
+import type {Update} from 'grammy/types';
+import {type MiddlewareProperty, type Options, TelegrafWikibase} from '../source/index.js';
 
 type Context = {
 	readonly wb: MiddlewareProperty;
@@ -51,9 +49,9 @@ const macro = test.macro(async (t,
 		},
 	});
 
-	const bot = new Bot('123:ABC');
+	const bot = new Bot<MyContext>('123:ABC');
 	(bot as any).botInfo = {};
-	bot.use(async (ctx: any, next) => {
+	bot.use(async (ctx, next) => {
 		ctx.session = {};
 		await pre(ctx);
 		return next();
@@ -64,11 +62,11 @@ const macro = test.macro(async (t,
 
 	bot.use(twb.middleware());
 
-	bot.use(async (ctx: any) => {
+	bot.use(async ctx => {
 		await env(ctx, t);
 	});
 
-	await bot.handleUpdate(update);
+	await bot.handleUpdate(update as Update);
 });
 
 test('context has wb object', macro, {}, () => {}, (ctx, t) => {
@@ -77,8 +75,9 @@ test('context has wb object', macro, {}, () => {}, (ctx, t) => {
 
 test('contextKey can be changed', macro, {
 	contextKey: 'wd',
-}, () => {}, (ctx: any, t) => {
+}, () => {}, (ctx, t) => {
 	t.falsy(ctx.wb);
+	// @ts-expect-error changed key but not in type
 	t.truthy(ctx.wd);
 });
 
