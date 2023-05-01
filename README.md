@@ -3,23 +3,23 @@
 [![NPM Version](https://img.shields.io/npm/v/telegraf-wikibase.svg)](https://www.npmjs.com/package/telegraf-wikibase)
 [![node](https://img.shields.io/node/v/telegraf-wikibase.svg)](https://www.npmjs.com/package/telegraf-wikibase)
 
-> Telegraf Middleware to use Wikibase entities (like Wikidata ones) in your users language
+> Telegraf/grammY Middleware to use Wikibase entities (like Wikidata ones) in your users language
 
 This library is inspired by [telegraf-i18n](https://github.com/telegraf/telegraf-i18n) and was made to work with [Wikidata](https://wikidata.org/).
 
-HINT: [wikibase-sdk](https://github.com/maxlath/wikibase-sdk) just went from being wikidata-sdk to be usable for Wikibase in general.
+HINT: [wikibase-sdk](https://github.com/maxlath/wikibase-sdk) went from being `wikidata-sdk` to be usable for Wikibase in general.
 As this process is ongoing this library only supports Wikidata currently.
 General Wikibase support is wished for but not worked on currently. (Feel free to create a Pull Request.)
 
 ## Install
 
-```
-$ npm install telegraf-wikibase telegraf
+```bash
+npm install telegraf-wikibase
 ```
 
 ## Usage
 
-```js
+```ts
 import {TelegrafWikibase} from 'telegraf-wikibase';
 
 const twb = new TelegrafWikibase()
@@ -28,9 +28,9 @@ twb.addResourceKeys({human: 'Q5', earth: 'Q2'})
 bot.use(twb)
 
 bot.command('foo', async ctx => {
-	const reader = await ctx.wb.r('human')
-	return ctx.reply(`Hey ${reader.label()}!`)
-	// returns 'Hey Human!'; 'Hey Mensch!'; … depending on the users language
+  const reader = await ctx.wb.r('human')
+  return ctx.reply(`Hey ${reader.label()}!`)
+  // returns 'Hey Human!'; 'Hey Mensch!'; … depending on the users language
 })
 ```
 
@@ -45,18 +45,18 @@ bot.use(new TelegrafWikibase())
 bot.use(new TelegrafWikibase(store: Store<EntitySimplified>, options))
 ```
 
-`store` to access requested resourceKeys or entity ids (Q-Numbers).
+`store` to access requested `resourceKeys` or entity IDs (Q-Numbers).
 
 #### options
 
 ```ts
 const options = {
-	contextKey: 'wd'
+  contextKey: 'wd'
 }
 ```
 
 `contextKey` determines the key where to reach the Context Methods.
-Defaults to wb (`ctx.wb.reader`)
+Defaults to `wb` (`ctx.wb.reader`)
 
 ### Context Methods
 
@@ -66,14 +66,14 @@ Defaults to wb (`ctx.wb.reader`)
 ctx.wb.locale(): string
 ```
 
-Returns the currently set languageCode of the user.
+Returns current `languageCode` of the user.
 
 ```ts
 ctx.wb.locale(languageCode: string): string
 ```
 
-Set the languageCode to the `ctx.session` of the user.
-Still returns the (newly set) languageCode of the user.
+Set the `languageCode` to the `ctx.session` of the user.
+Still returns the (newly set) `languageCode` of the user.
 
 #### reader
 
