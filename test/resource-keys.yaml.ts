@@ -7,24 +7,24 @@ test('empty yaml', t => {
 
 test('flat key values', t => {
 	const input = `
-key: value
-foo: bar
+key: Q42
+foo: Q1337
 	`;
 	t.deepEqual(resourceKeysFromYaml(input), {
-		key: 'value',
-		foo: 'bar',
+		key: 'Q42',
+		foo: 'Q1337',
 	});
 });
 
 test('deep key values', t => {
 	const input = `
 foo:
-    bar: test please ignore
-flat: value
+    bar: Q42
+flat: Q1337
 	`;
 	t.deepEqual(resourceKeysFromYaml(input), {
-		'foo.bar': 'test please ignore',
-		flat: 'value',
+		'foo.bar': 'Q42',
+		flat: 'Q1337',
 	});
 });
 
