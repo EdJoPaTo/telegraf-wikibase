@@ -28,7 +28,7 @@
 		"node": ">=18"
 	},
 	"dependencies": {
-		"@edjopato/datastore": "^0.6.0",
+		"@edjopato/datastore": "^0.7.0",
 		"array-filter-unique": "^3.0.2",
 		"js-yaml": "^4.0.0",
 		"tableize-object": "^0.1.0",
