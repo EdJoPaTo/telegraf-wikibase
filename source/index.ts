@@ -68,21 +68,19 @@ const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
 const DEFAULT_USER_AGENT = 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase';
 
 export class TelegrafWikibase {
-	private readonly _resourceKeys = new Map<string, EntityId>();
+	public readonly contextKey: string;
 
-	private readonly _entityCache: Cache<EntityId, SimplifiedEntity>;
+	public readonly ttl: number;
 
-	private readonly _defaultLanguageCode: string;
+	readonly #resourceKeys = new Map<string, EntityId>();
 
-	private readonly _contextKey: string;
-
-	private readonly _ttl: number;
+	readonly #entityCache: Cache<EntityId, SimplifiedEntity>;
 
 	constructor(
 		options: Options = {},
 	) {
-		this._defaultLanguageCode = 'en';
-		this._contextKey = options.contextKey ?? 'wb';
+		this.contextKey = options.contextKey ?? 'wb';
+		this.ttl = options.ttl ?? DEFAULT_TTL;
 
 		const store: Store<SimplifiedEntity> = options.store ?? new TtlKeyValueInMemory();
 		if (!store.ttlSupport) {
@@ -91,12 +89,10 @@ export class TelegrafWikibase {
 			);
 		}
 
-		this._ttl = options.ttl ?? DEFAULT_TTL;
-
 		const headers = new Headers();
 		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
 
-		this._entityCache = new Cache<EntityId, SimplifiedEntity>({
+		this.#entityCache = new Cache<EntityId, SimplifiedEntity>({
 			async bulkQuery(ids) {
 				if (options.logQueriedEntityIds) {
 					console.log('TelegrafWikibase getEntities', ids.length, ids);
@@ -106,25 +102,25 @@ export class TelegrafWikibase {
 			},
 		}, {
 			store,
-			ttl: this._ttl,
+			ttl: this.ttl,
 		});
 	}
 
 	addResourceKeys(resourceKeys: Readonly<Record<string, EntityId>>): void {
 		for (const [key, newValue] of Object.entries(resourceKeys)) {
-			const existingValue = this._resourceKeys.get(key);
+			const existingValue = this.#resourceKeys.get(key);
 			if (existingValue && existingValue !== newValue) {
 				throw new Error(
 					`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`,
 				);
 			}
 
-			this._resourceKeys.set(key, newValue);
+			this.#resourceKeys.set(key, newValue);
 		}
 	}
 
 	entityIdFromKey(keyOrEntityId: string): EntityId {
-		const resourceKeyEntityId = this._resourceKeys.get(keyOrEntityId);
+		const resourceKeyEntityId = this.#resourceKeys.get(keyOrEntityId);
 		if (resourceKeyEntityId) {
 			return resourceKeyEntityId;
 		}
@@ -146,7 +142,7 @@ export class TelegrafWikibase {
 		languageCode: string,
 	): Promise<WikibaseEntityReader> {
 		const entityId = this.entityIdFromKey(keyOrEntityId);
-		const entity = await this._entityCache.get(entityId);
+		const entity = await this.#entityCache.get(entityId);
 		return new WikibaseEntityReader(entity, languageCode);
 	}
 
@@ -157,17 +153,17 @@ export class TelegrafWikibase {
 	async startRegularResourceKeyUpdate(
 		errorHandler?: (error: unknown) => void | Promise<void>,
 	): Promise<NodeJS.Timer> {
-		await this._entityCache.getMany([...this._resourceKeys.values()], true);
+		await this.#entityCache.getMany([...this.#resourceKeys.values()], true);
 
 		return setInterval(async () => {
 			try {
-				await this._entityCache.getMany([...this._resourceKeys.values()], true);
+				await this.#entityCache.getMany([...this.#resourceKeys.values()], true);
 			} catch (error: unknown) {
 				if (errorHandler) {
 					await errorHandler(error);
 				}
 			}
-		}, this._ttl * 0.95);
+		}, this.ttl * 0.95);
 	}
 
 	/**
@@ -177,7 +173,7 @@ export class TelegrafWikibase {
 	 */
 	async preload(keysOrEntityIds: readonly string[]): Promise<void> {
 		const entityIds = keysOrEntityIds.map(o => this.entityIdFromKey(o));
-		await this._entityCache.getMany(entityIds);
+		await this.#entityCache.getMany(entityIds);
 	}
 
 	async localeProgress(
@@ -192,8 +188,8 @@ export class TelegrafWikibase {
 	}
 
 	async allLocaleProgress(): Promise<Record<string, number>> {
-		const allResourceKeyEntityIds = [...this._resourceKeys.values()];
-		const all = await this._entityCache.getMany(allResourceKeyEntityIds);
+		const allResourceKeyEntityIds = [...this.#resourceKeys.values()];
+		const all = await this.#entityCache.getMany(allResourceKeyEntityIds);
 		const allEntries = Object.values(all);
 
 		const localeProgress = allEntries
@@ -232,7 +228,7 @@ export class TelegrafWikibase {
 				ctx.session.__wikibase_language_code = ctx.from.language_code;
 			}
 
-			await this.preload([...this._resourceKeys.values()]);
+			await this.preload([...this.#resourceKeys.values()]);
 
 			const middlewareProperty: MiddlewareProperty = {
 				reader: async (key, language) =>
@@ -255,7 +251,7 @@ export class TelegrafWikibase {
 			};
 
 			// @ts-expect-error key indexing an interface without key index
-			ctx[this._contextKey] = middlewareProperty;
+			ctx[this.contextKey] = middlewareProperty;
 			return next();
 		};
 	}
@@ -266,6 +262,6 @@ export class TelegrafWikibase {
 	private _lang(ctx: MinimalContext): string {
 		return ctx.session?.__wikibase_language_code
 			?? ctx.from?.language_code
-			?? this._defaultLanguageCode;
+			?? 'en';
 	}
 }
