@@ -1,7 +1,7 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
-import {isEntityId, type EntityId, type SimplifiedEntity} from 'wikibase-sdk';
+import {type Entity, type EntityId, isEntityId} from 'wikibase-sdk';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
-import {getEntitiesSimplified} from './wdk.js';
+import {getEntities} from './wdk.js';
 
 export type {WikibaseEntityReader} from 'wikidata-entity-reader';
 
@@ -49,7 +49,7 @@ export type Options = {
 	 * Store object which keeps the entities. Can be used to store more persistent than in memory.
 	 * In order to always use up to date wikidata entities use a store with ttl support.
 	 */
-	readonly store?: Store<SimplifiedEntity>;
+	readonly store?: Store<Entity>;
 
 	/**
 	 * Time to live of entities within the cache in milliseconds.
@@ -74,7 +74,7 @@ export class TelegrafWikibase {
 
 	readonly #resourceKeys = new Map<string, EntityId>();
 
-	readonly #entityCache: Cache<EntityId, SimplifiedEntity>;
+	readonly #entityCache: Cache<EntityId, Entity>;
 
 	constructor(
 		options: Options = {},
@@ -82,7 +82,7 @@ export class TelegrafWikibase {
 		this.contextKey = options.contextKey ?? 'wb';
 		this.ttl = options.ttl ?? DEFAULT_TTL;
 
-		const store: Store<SimplifiedEntity> = options.store ?? new TtlKeyValueInMemory();
+		const store: Store<Entity> = options.store ?? new TtlKeyValueInMemory();
 		if (!store.ttlSupport) {
 			console.log(
 				'TelegrafWikibase consider using a store with ttl support',
@@ -92,13 +92,13 @@ export class TelegrafWikibase {
 		const headers = new Headers();
 		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
 
-		this.#entityCache = new Cache<EntityId, SimplifiedEntity>({
+		this.#entityCache = new Cache<EntityId, Entity>({
 			async bulkQuery(ids) {
 				if (options.logQueriedEntityIds) {
 					console.log('TelegrafWikibase getEntities', ids.length, ids);
 				}
 
-				return getEntitiesSimplified({ids: [...ids]}, {headers});
+				return getEntities({ids: [...ids]}, {headers});
 			},
 		}, {
 			store,

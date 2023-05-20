@@ -1,5 +1,5 @@
 import {arrayFilterUnique} from 'array-filter-unique';
-import {simplifyEntities, type Entity, type SimplifiedEntity} from 'wikibase-sdk';
+import type {Entity} from 'wikibase-sdk';
 // eslint-disable-next-line n/file-extension-in-import
 import {wdk} from 'wikibase-sdk/wikidata.org';
 
@@ -27,12 +27,4 @@ export async function getEntities(
 	return Object.fromEntries(
 		entityDictionaryArray.flatMap(o => Object.entries(o)),
 	);
-}
-
-export async function getEntitiesSimplified(
-	options: GetManyEntitiesOptions,
-	fetchOptions: RequestInit = {},
-): Promise<Record<string, SimplifiedEntity>> {
-	const entities = await getEntities(options, fetchOptions);
-	return simplifyEntities(entities);
 }
