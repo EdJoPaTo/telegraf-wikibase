@@ -1,6 +1,5 @@
 import {Bot, type Context as BaseContext} from 'grammy';
 import test, {type ExecutionContext} from 'ava';
-import type {Update} from 'grammy/types';
 import {type MiddlewareProperty, type Options, TelegrafWikibase} from '../source/index.js';
 
 type Context = {
@@ -66,7 +65,8 @@ const macro = test.macro(async (t,
 		await env(ctx, t);
 	});
 
-	await bot.handleUpdate(update as Update);
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+	await bot.handleUpdate(update);
 });
 
 test('context has wb object', macro, {}, () => {}, (ctx, t) => {
