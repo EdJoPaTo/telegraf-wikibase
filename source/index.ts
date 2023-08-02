@@ -158,7 +158,7 @@ export class TelegrafWikibase {
 		return setInterval(async () => {
 			try {
 				await this.#entityCache.getMany([...this.#resourceKeys.values()], true);
-			} catch (error: unknown) {
+			} catch (error) {
 				if (errorHandler) {
 					await errorHandler(error);
 				}
