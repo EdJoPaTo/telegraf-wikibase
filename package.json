@@ -38,7 +38,6 @@
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^4.0.0",
 		"@types/js-yaml": "^4.0.0",
-		"@types/node": "^18.11.18",
 		"ava": "^5.0.1",
 		"del-cli": "^5.0.0",
 		"grammy": "^1.2.0",
