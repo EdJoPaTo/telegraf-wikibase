@@ -1,6 +1,5 @@
 import {arrayFilterUnique} from 'array-filter-unique';
 import type {Entity} from 'wikibase-sdk';
-// eslint-disable-next-line n/file-extension-in-import
 import {wdk} from 'wikibase-sdk/wikidata.org';
 
 type Wbk = typeof wdk;
