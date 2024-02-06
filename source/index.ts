@@ -192,17 +192,14 @@ export class TelegrafWikibase {
 		const all = await this.#entityCache.getMany(allResourceKeyEntityIds);
 		const allEntries = Object.values(all);
 
-		const localeProgress = allEntries
-			.flatMap(o => Object.keys(('labels' in o && o.labels) ?? {}))
-			// eslint-disable-next-line unicorn/no-array-reduce, @typescript-eslint/prefer-readonly-parameter-types
-			.reduce((coll: Record<string, number>, add) => {
-				if (!coll[add]) {
-					coll[add] = 0;
-				}
+		const allLabels = allEntries
+			.flatMap(o => Object.keys(('labels' in o && o.labels) ?? {}));
 
-				coll[add] += 1 / allEntries.length;
-				return coll;
-			}, {});
+		const localeProgress: Record<string, number> = {};
+		for (const add of allLabels) {
+			localeProgress[add] ??= 0;
+			localeProgress[add] += 1 / allEntries.length;
+		}
 
 		return localeProgress;
 	}
@@ -224,8 +221,8 @@ export class TelegrafWikibase {
 		next: () => Promise<void>,
 	) => Promise<void> {
 		return async (ctx, next) => {
-			if (ctx.session && !ctx.session.__wikibase_language_code && ctx.from?.language_code) {
-				ctx.session.__wikibase_language_code = ctx.from.language_code;
+			if (ctx.session && ctx.from?.language_code) {
+				ctx.session.__wikibase_language_code ||= ctx.from.language_code;
 			}
 
 			await this.preload([...this.#resourceKeys.values()]);
