@@ -3,8 +3,7 @@ import type {Entity} from 'wikibase-sdk';
 import {wdk} from 'wikibase-sdk/wikidata.org';
 
 type Wbk = typeof wdk;
-
-export type GetManyEntitiesOptions = Readonly<Parameters<Wbk['getManyEntities']>[0]>;
+type GetManyEntitiesOptions = Readonly<Parameters<Wbk['getManyEntities']>[0]>;
 
 export async function getEntities(
 	options: GetManyEntitiesOptions,
