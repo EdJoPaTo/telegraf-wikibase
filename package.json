@@ -39,7 +39,7 @@
 		"@sindresorhus/tsconfig": "^5.0.0",
 		"@types/js-yaml": "^4.0.0",
 		"@types/node": "^18.19.3",
-		"c8": "^8.0.1",
+		"c8": "^9.1.0",
 		"del-cli": "^5.0.0",
 		"grammy": "^1.2.0",
 		"telegraf": "^4.0.0",
