@@ -8,11 +8,11 @@ export type {WikibaseEntityReader} from 'wikidata-entity-reader';
 export * from './resource-keys.ts';
 
 type MinimalContext = {
-	readonly from?: {
+	readonly from?: undefined | {
 		readonly language_code?: string;
 	};
 
-	readonly session?: {
+	readonly session?: undefined | {
 		__wikibase_language_code?: string;
 	};
 };
