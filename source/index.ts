@@ -1,11 +1,11 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
 import {type Entity, type EntityId, isEntityId} from 'wikibase-sdk';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
-import {getEntities} from './wdk.js';
+import {getEntities} from './wdk.ts';
 
 export type {WikibaseEntityReader} from 'wikidata-entity-reader';
 
-export * from './resource-keys.js';
+export * from './resource-keys.ts';
 
 type MinimalContext = {
 	readonly from?: {

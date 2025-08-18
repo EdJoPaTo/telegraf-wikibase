@@ -5,7 +5,7 @@ import {
 	type MiddlewareProperty,
 	type Options,
 	TelegrafWikibase,
-} from './index.js';
+} from './index.ts';
 
 type Context = {
 	readonly wb: MiddlewareProperty;

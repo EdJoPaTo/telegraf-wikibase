@@ -1,6 +1,6 @@
 import {deepStrictEqual, throws} from 'node:assert';
 import {test} from 'node:test';
-import {resourceKeysFromYaml} from './resource-keys.js';
+import {resourceKeysFromYaml} from './resource-keys.ts';
 
 await test('resourceKeysFromYaml', async t => {
 	const macro = async (
