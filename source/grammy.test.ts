@@ -78,9 +78,14 @@ await test('grammY', async t => {
 			await bot.handleUpdate(update);
 		});
 
-	await macro('context has wb object', {}, () => {}, ctx => {
-		ok(ctx.wb);
-	});
+	await macro(
+		'context has wb object',
+		{},
+		() => {},
+		ctx => {
+			ok(ctx.wb);
+		},
+	);
 
 	await macro(
 		'contextKey can be changed',
@@ -95,13 +100,24 @@ await test('grammY', async t => {
 		},
 	);
 
-	await macro('fallback language is default language', {}, () => {}, ctx => {
-		strictEqual(ctx.wb.locale(), 'en');
-	});
+	await macro(
+		'fallback language is default language',
+		{},
+		() => {},
+		ctx => {
+			strictEqual(ctx.wb.locale(), 'en');
+		},
+	);
 
-	await macro('language is read from ctx.from', {}, () => {}, ctx => {
-		strictEqual(ctx.wb.locale(), 'de');
-	}, {message: {from: {language_code: 'de'}}});
+	await macro(
+		'language is read from ctx.from',
+		{},
+		() => {},
+		ctx => {
+			strictEqual(ctx.wb.locale(), 'de');
+		},
+		{message: {from: {language_code: 'de'}}},
+	);
 
 	await macro(
 		'language from ctx.from is saved on session',
@@ -113,31 +129,58 @@ await test('grammY', async t => {
 		{message: {from: {language_code: 'de'}}},
 	);
 
-	await macro('language is read from session', {}, ctx => {
-		ctx.session!.__wikibase_language_code = 'am';
-	}, ctx => {
-		strictEqual(ctx.wb.locale(), 'am');
-	}, {message: {from: {language_code: 'de'}}});
+	await macro(
+		'language is read from session',
+		{},
+		ctx => {
+			ctx.session!.__wikibase_language_code = 'am';
+		},
+		ctx => {
+			strictEqual(ctx.wb.locale(), 'am');
+		},
+		{message: {from: {language_code: 'de'}}},
+	);
 
-	await macro('language does not fail without session', {}, ctx => {
-		delete ctx.session;
-	}, ctx => {
-		strictEqual(ctx.wb.locale(), 'de');
-	}, {message: {from: {language_code: 'de'}}});
+	await macro(
+		'language does not fail without session',
+		{},
+		ctx => {
+			delete ctx.session;
+		},
+		ctx => {
+			strictEqual(ctx.wb.locale(), 'de');
+		},
+		{message: {from: {language_code: 'de'}}},
+	);
 
-	await macro('locale can be set', {}, () => {}, ctx => {
-		ctx.wb.locale('de');
-		strictEqual(ctx.session?.__wikibase_language_code, 'de');
-	});
+	await macro(
+		'locale can be set',
+		{},
+		() => {},
+		ctx => {
+			ctx.wb.locale('de');
+			strictEqual(ctx.session?.__wikibase_language_code, 'de');
+		},
+	);
 
-	await macro('get reader works', {}, () => {}, async ctx => {
-		const reader = await ctx.wb.reader('human');
-		strictEqual(reader.label(), 'Q5');
-	});
+	await macro(
+		'get reader works',
+		{},
+		() => {},
+		async ctx => {
+			const reader = await ctx.wb.reader('human');
+			strictEqual(reader.label(), 'Q5');
+		},
+	);
 
-	await macro('localeProgress available', {}, () => {}, async ctx => {
-		strictEqual(await ctx.wb.localeProgress('de'), 2 / 3);
-	});
+	await macro(
+		'localeProgress available',
+		{},
+		() => {},
+		async ctx => {
+			strictEqual(await ctx.wb.localeProgress('de'), 2 / 3);
+		},
+	);
 
 	await macro(
 		'localeProgress available sublanguage',
@@ -157,26 +200,46 @@ await test('grammY', async t => {
 		},
 	);
 
-	await macro('localeProgress unavailable is 0', {}, () => {}, async ctx => {
-		strictEqual(await ctx.wb.localeProgress('am'), 0);
-	});
+	await macro(
+		'localeProgress unavailable is 0',
+		{},
+		() => {},
+		async ctx => {
+			strictEqual(await ctx.wb.localeProgress('am'), 0);
+		},
+	);
 
-	await macro('localeProgress of user', {}, () => {}, async ctx => {
-		strictEqual(ctx.wb.locale(), 'en', 'sanity check');
-		strictEqual(await ctx.wb.localeProgress(), 2 / 3);
-	});
+	await macro(
+		'localeProgress of user',
+		{},
+		() => {},
+		async ctx => {
+			strictEqual(ctx.wb.locale(), 'en', 'sanity check');
+			strictEqual(await ctx.wb.localeProgress(), 2 / 3);
+		},
+	);
 
-	await macro('allLocaleProgress', {}, () => {}, async ctx => {
-		deepStrictEqual(await ctx.wb.allLocaleProgress(), {
-			de: 2 / 3,
-			'de-ch': 1 / 3,
-			en: 2 / 3,
-		});
-	});
+	await macro(
+		'allLocaleProgress',
+		{},
+		() => {},
+		async ctx => {
+			deepStrictEqual(await ctx.wb.allLocaleProgress(), {
+				de: 2 / 3,
+				'de-ch': 1 / 3,
+				en: 2 / 3,
+			});
+		},
+	);
 
-	await macro('availableLocales', {}, () => {}, async ctx => {
-		deepStrictEqual(await ctx.wb.availableLocales(), ['de', 'en']);
-	});
+	await macro(
+		'availableLocales',
+		{},
+		() => {},
+		async ctx => {
+			deepStrictEqual(await ctx.wb.availableLocales(), ['de', 'en']);
+		},
+	);
 
 	await macro(
 		'availableLocales with high standards',
@@ -187,13 +250,10 @@ await test('grammY', async t => {
 		},
 	);
 
-	await t.test(
-		'availableLocales on class itself',
-		async () => {
-			const entityStore = new Map();
-			(entityStore as any).ttlSupport = true;
-			const twb = new TelegrafWikibase({store: entityStore});
-			deepStrictEqual(await twb.availableLocales(), []);
-		},
-	);
+	await t.test('availableLocales on class itself', async () => {
+		const entityStore = new Map();
+		(entityStore as any).ttlSupport = true;
+		const twb = new TelegrafWikibase({store: entityStore});
+		deepStrictEqual(await twb.availableLocales(), []);
+	});
 });

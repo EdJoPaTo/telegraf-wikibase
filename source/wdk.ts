@@ -14,15 +14,13 @@ export async function getEntities(
 		format: 'json',
 		ids: options.ids.filter(arrayFilterUnique()),
 	});
-	const entityDictionaryArray = await Promise.all(
-		urls.map(async o => {
-			const response = await fetch(o, fetchOptions);
-			const body = await response.json() as {entities: Readonly<Record<string, Entity>>};
-			return body.entities;
-		}),
-	);
+	const entityDictionaryArray = await Promise.all(urls.map(async o => {
+		const response = await fetch(o, fetchOptions);
+		const body = await response.json() as {
+			entities: Readonly<Record<string, Entity>>;
+		};
+		return body.entities;
+	}));
 
-	return Object.fromEntries(
-		entityDictionaryArray.flatMap(o => Object.entries(o)),
-	);
+	return Object.fromEntries(entityDictionaryArray.flatMap(o => Object.entries(o)));
 }

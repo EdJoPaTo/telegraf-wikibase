@@ -20,18 +20,18 @@ npm install telegraf-wikibase
 ## Usage
 
 ```ts
-import {TelegrafWikibase} from 'telegraf-wikibase';
+import { TelegrafWikibase } from "telegraf-wikibase";
 
-const twb = new TelegrafWikibase()
-twb.addResourceKeys({human: 'Q5', earth: 'Q2'})
+const twb = new TelegrafWikibase();
+twb.addResourceKeys({ human: "Q5", earth: "Q2" });
 
-bot.use(twb)
+bot.use(twb);
 
-bot.command('foo', async ctx => {
-  const reader = await ctx.wb.r('human')
-  return ctx.reply(`Hey ${reader.label()}!`)
-  // returns 'Hey Human!'; 'Hey Mensch!'; … depending on the users language
-})
+bot.command("foo", async (ctx) => {
+	const reader = await ctx.wb.r("human");
+	return ctx.reply(`Hey ${reader.label()}!`);
+	// returns 'Hey Human!'; 'Hey Mensch!'; … depending on the users language
+});
 ```
 
 The middleware adds `.wb` to the Context `ctx`.
@@ -51,8 +51,8 @@ bot.use(new TelegrafWikibase(store: Store<EntitySimplified>, options))
 
 ```ts
 const options = {
-  contextKey: 'wd'
-}
+	contextKey: "wd",
+};
 ```
 
 `contextKey` determines the key where to reach the Context Methods.

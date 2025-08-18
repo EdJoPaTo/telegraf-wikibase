@@ -65,7 +65,8 @@ export type Options = {
 };
 
 const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
-const DEFAULT_USER_AGENT = 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase';
+const DEFAULT_USER_AGENT
+	= 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase';
 
 export class TelegrafWikibase {
 	public readonly contextKey: string;
@@ -76,43 +77,40 @@ export class TelegrafWikibase {
 
 	readonly #entityCache: Cache<EntityId, Entity>;
 
-	constructor(
-		options: Options = {},
-	) {
+	constructor(options: Options = {}) {
 		this.contextKey = options.contextKey ?? 'wb';
 		this.ttl = options.ttl ?? DEFAULT_TTL;
 
 		const store: Store<Entity> = options.store ?? new TtlKeyValueInMemory();
 		if (!store.ttlSupport) {
-			console.log(
-				'TelegrafWikibase consider using a store with ttl support',
-			);
+			console.log('TelegrafWikibase consider using a store with ttl support');
 		}
 
 		const headers = new Headers();
 		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
 
-		this.#entityCache = new Cache<EntityId, Entity>({
-			async bulkQuery(ids) {
-				if (options.logQueriedEntityIds) {
-					console.log('TelegrafWikibase getEntities', ids.length, ids);
-				}
+		this.#entityCache = new Cache<EntityId, Entity>(
+			{
+				async bulkQuery(ids) {
+					if (options.logQueriedEntityIds) {
+						console.log('TelegrafWikibase getEntities', ids.length, ids);
+					}
 
-				return getEntities({ids: [...ids]}, {headers});
+					return getEntities({ids: [...ids]}, {headers});
+				},
 			},
-		}, {
-			store,
-			ttl: this.ttl,
-		});
+			{
+				store,
+				ttl: this.ttl,
+			},
+		);
 	}
 
 	addResourceKeys(resourceKeys: Readonly<Record<string, EntityId>>): void {
 		for (const [key, newValue] of Object.entries(resourceKeys)) {
 			const existingValue = this.#resourceKeys.get(key);
 			if (existingValue && existingValue !== newValue) {
-				throw new Error(
-					`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`,
-				);
+				throw new Error(`key ${key} already exists with a different value: ${newValue} !== ${existingValue}`);
 			}
 
 			this.#resourceKeys.set(key, newValue);
@@ -126,9 +124,8 @@ export class TelegrafWikibase {
 		}
 
 		if (!isEntityId(keyOrEntityId)) {
-			throw new Error(
-				'Argument is neither a resourceKey or an entity id: ' + String(keyOrEntityId),
-			);
+			throw new Error('Argument is neither a resourceKey or an entity id: '
+				+ String(keyOrEntityId));
 		}
 
 		return keyOrEntityId;
@@ -150,9 +147,7 @@ export class TelegrafWikibase {
 	 * Will update the resource keys regularly so they are always available.
 	 * @param errorHandler Will be called when the updating failed
 	 */
-	async startRegularResourceKeyUpdate(
-		errorHandler?: (error: unknown) => void | Promise<void>,
-	): Promise<NodeJS.Timer> {
+	async startRegularResourceKeyUpdate(errorHandler?: (error: unknown) => void | Promise<void>): Promise<NodeJS.Timeout> {
 		await this.#entityCache.getMany([...this.#resourceKeys.values()], true);
 
 		return setInterval(async () => {
@@ -192,8 +187,8 @@ export class TelegrafWikibase {
 		const all = await this.#entityCache.getMany(allResourceKeyEntityIds);
 		const allEntries = Object.values(all);
 
-		const allLabels = allEntries
-			.flatMap(o => Object.keys(('labels' in o && o.labels) ?? {}));
+		const allLabels = allEntries.flatMap(o =>
+			Object.keys(('labels' in o && o.labels) ?? {}));
 
 		const localeProgress: Record<string, number> = {};
 		for (const add of allLabels) {
@@ -204,9 +199,7 @@ export class TelegrafWikibase {
 		return localeProgress;
 	}
 
-	async availableLocales(
-		percentageOfLabelsRequired = 0.5,
-	): Promise<readonly string[]> {
+	async availableLocales(percentageOfLabelsRequired = 0.5): Promise<readonly string[]> {
 		const localeProgress = await this.allLocaleProgress();
 		return Object.entries(localeProgress)
 			// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
@@ -221,8 +214,12 @@ export class TelegrafWikibase {
 		next: () => Promise<void>,
 	) => Promise<void> {
 		return async (ctx, next) => {
-			if (ctx.session && ctx.from?.language_code) {
-				ctx.session.__wikibase_language_code ||= ctx.from.language_code;
+			if (
+				ctx.session
+				&& ctx.from?.language_code
+				&& !ctx.session.__wikibase_language_code
+			) {
+				ctx.session.__wikibase_language_code = ctx.from.language_code;
 			}
 
 			await this.preload([...this.#resourceKeys.values()]);
@@ -235,8 +232,14 @@ export class TelegrafWikibase {
 				allLocaleProgress: async () => this.allLocaleProgress(),
 				availableLocales: async (percentageOfLabelsRequired = 0.5) =>
 					this.availableLocales(percentageOfLabelsRequired),
-				localeProgress: async (languageCode?: string, useBaseLanguageCode?: boolean) =>
-					this.localeProgress(languageCode ?? this._lang(ctx), useBaseLanguageCode),
+				localeProgress: async (
+					languageCode?: string,
+					useBaseLanguageCode?: boolean,
+				) =>
+					this.localeProgress(
+						languageCode ?? this._lang(ctx),
+						useBaseLanguageCode,
+					),
 				locale: (languageCode?: string) => {
 					if (languageCode && ctx.session) {
 						ctx.session.__wikibase_language_code = languageCode;
