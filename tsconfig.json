@@ -18,7 +18,7 @@
 		"rootDir": "./source",
 		"skipLibCheck": true,
 		"target": "es2022", // Node.js 18
-		"types": ["js-yaml","node"],
+		"types": ["node"],
 		"verbatimModuleSyntax": true
 	}
 }
