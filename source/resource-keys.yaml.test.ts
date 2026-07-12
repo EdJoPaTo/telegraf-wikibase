@@ -12,8 +12,6 @@ await test('resourceKeysFromYaml', async t => {
 			deepStrictEqual(resourceKeysFromYaml(input), expected);
 		});
 
-	await macro('empty yaml', '', {});
-
 	await macro(
 		'flat key values',
 		`
@@ -38,6 +36,12 @@ flat: Q1337
 			flat: 'Q1337',
 		},
 	);
+
+	await t.test('empty yaml fails', () => {
+		throws(() => {
+			resourceKeysFromYaml('');
+		});
+	});
 
 	await t.test('garbage input fails in yaml package', () => {
 		throws(() => {
