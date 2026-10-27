@@ -14,13 +14,26 @@ export async function getEntities(
 		format: 'json',
 		ids: options.ids.filter(arrayFilterUnique()),
 	});
-	const entityDictionaryArray = await Promise.all(urls.map(async o => {
-		const response = await fetch(o, fetchOptions);
-		const body = await response.json() as {
+	const result: Record<string, Entity> = {};
+	// eslint-disable-next-line @typescript-eslint/await-thenable
+	for await (const url of urls) {
+		const response = await fetch(url, fetchOptions);
+		if (!response.ok) {
+			const body = await response.text();
+			console.error(
+				'Wikidata request failed',
+				response.status,
+				response.statusText,
+				body,
+			);
+			continue;
+		}
+
+		const jsonBody = await response.json() as {
 			entities: Readonly<Record<string, Entity>>;
 		};
-		return body.entities;
-	}));
+		Object.assign(result, jsonBody.entities);
+	}
 
-	return Object.fromEntries(entityDictionaryArray.flatMap(o => Object.entries(o)));
+	return result;
 }
