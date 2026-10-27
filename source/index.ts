@@ -1,7 +1,7 @@
 import {Cache, TtlKeyValueInMemory} from '@edjopato/datastore';
 import {type Entity, type EntityId, isEntityId} from 'wikibase-sdk';
 import {WikibaseEntityReader} from 'wikidata-entity-reader';
-import {getEntities} from './wdk.ts';
+import {getEntitiesFactory} from './wdk.ts';
 
 export type {WikibaseEntityReader} from 'wikidata-entity-reader';
 
@@ -40,6 +40,11 @@ export type Options = {
 	readonly contextKey?: string;
 
 	/**
+	 * Wikibase instance to use. Defaults to `https://www.wikidata.org`
+	 */
+	readonly instanceApiEndpoint?: string;
+
+	/**
 	 * Logs when entities are queried as they are not (anymore) in the cache.
 	 * Helps with debugging: When there are a bulk of single queries they could have preloaded first.
 	 */
@@ -64,6 +69,7 @@ export type Options = {
 	readonly userAgent?: string;
 };
 
+const DEFAULT_INSTANCE = 'https://www.wikidata.org';
 const DEFAULT_TTL = 6 * 60 * 60 * 1000; // 6 hours
 const DEFAULT_USER_AGENT
 	= 'some unspecified project depending on github.com/EdJoPaTo/telegraf-wikibase';
@@ -86,8 +92,10 @@ export class TelegrafWikibase {
 			console.log('TelegrafWikibase consider using a store with ttl support');
 		}
 
-		const headers = new Headers();
-		headers.set('user-agent', options.userAgent ?? DEFAULT_USER_AGENT);
+		const getEntities = getEntitiesFactory(
+			options.instanceApiEndpoint ?? DEFAULT_INSTANCE,
+			options.userAgent ?? DEFAULT_USER_AGENT,
+		);
 
 		this.#entityCache = new Cache<EntityId, Entity>(
 			{
@@ -96,7 +104,7 @@ export class TelegrafWikibase {
 						console.log('TelegrafWikibase getEntities', ids.length, ids);
 					}
 
-					return getEntities({ids: [...ids]}, {headers});
+					return getEntities(ids);
 				},
 			},
 			{

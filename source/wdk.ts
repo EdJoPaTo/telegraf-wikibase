@@ -1,39 +1,43 @@
 import {arrayFilterUnique} from 'array-filter-unique';
-import type {Entity} from 'wikibase-sdk';
-import {wdk} from 'wikibase-sdk/wikidata.org';
+import {type Entity, type EntityId, WBK} from 'wikibase-sdk';
 
-type Wbk = typeof wdk;
-type GetManyEntitiesOptions = Readonly<Parameters<Wbk['getManyEntities']>[0]>;
+export function getEntitiesFactory(
+	instanceApiEndpoint: string,
+	userAgent: string,
+): (ids: readonly EntityId[]) => Promise<Record<string, Entity>> {
+	// eslint-disable-next-line new-cap
+	const wbk = WBK({instance: instanceApiEndpoint});
 
-export async function getEntities(
-	options: GetManyEntitiesOptions,
-	fetchOptions: RequestInit = {},
-): Promise<Record<string, Entity>> {
-	const urls = wdk.getManyEntities({
-		...options,
-		format: 'json',
-		ids: options.ids.filter(arrayFilterUnique()),
-	});
-	const result: Record<string, Entity> = {};
-	// eslint-disable-next-line @typescript-eslint/await-thenable
-	for await (const url of urls) {
-		const response = await fetch(url, fetchOptions);
-		if (!response.ok) {
-			const body = await response.text();
-			console.error(
-				'Wikidata request failed',
-				response.status,
-				response.statusText,
-				body,
-			);
-			continue;
+	const headers = new Headers();
+	headers.set('user-agent', userAgent);
+
+	return async ids => {
+		const urls = wbk.getManyEntities({
+			format: 'json',
+			ids: ids.filter(arrayFilterUnique()),
+		});
+
+		const result: Record<string, Entity> = {};
+		// eslint-disable-next-line @typescript-eslint/await-thenable
+		for await (const url of urls) {
+			const response = await fetch(url, {headers});
+			if (!response.ok) {
+				const body = await response.text();
+				console.error(
+					'Wikidata request failed',
+					response.status,
+					response.statusText,
+					body,
+				);
+				continue;
+			}
+
+			const jsonBody = await response.json() as {
+				entities: Readonly<Record<string, Entity>>;
+			};
+			Object.assign(result, jsonBody.entities);
 		}
 
-		const jsonBody = await response.json() as {
-			entities: Readonly<Record<string, Entity>>;
-		};
-		Object.assign(result, jsonBody.entities);
-	}
-
-	return result;
+		return result;
+	};
 }
