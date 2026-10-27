@@ -32,8 +32,8 @@
 		"array-filter-unique": "^3.0.2",
 		"js-yaml": "^5.0.0",
 		"tableize-object": "^0.1.0",
-		"wikibase-sdk": "^9.0.5",
-		"wikidata-entity-reader": "^4.0.0"
+		"wikibase-sdk": "^11.6.6",
+		"wikidata-entity-reader": "^5.0.0"
 	},
 	"devDependencies": {
 		"@types/node": "^18.19.3",
