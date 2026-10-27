@@ -1,51 +1,53 @@
-import {deepStrictEqual, throws} from 'node:assert';
-import {test} from 'node:test';
-import {resourceKeysFromYaml} from './resource-keys.ts';
+import { deepStrictEqual, throws } from "node:assert";
+import { test } from "node:test";
 
-await test('resourceKeysFromYaml', async t => {
-	const macro = async (
+import { resourceKeysFromYaml } from "./resource-keys.ts";
+
+await test("resourceKeysFromYaml", async (t) => {
+	async function macro(
 		title: string,
 		input: string,
 		expected: ReturnType<typeof resourceKeysFromYaml>,
-	) =>
-		t.test(title, () => {
+	) {
+		await t.test(title, () => {
 			deepStrictEqual(resourceKeysFromYaml(input), expected);
 		});
+	}
 
 	await macro(
-		'flat key values',
+		"flat key values",
 		`
 key: Q42
 foo: Q1337
 `,
 		{
-			key: 'Q42',
-			foo: 'Q1337',
+			key: "Q42",
+			foo: "Q1337",
 		},
 	);
 
 	await macro(
-		'deep key values',
+		"deep key values",
 		`
 foo:
     bar: Q42
 flat: Q1337
 `,
 		{
-			'foo.bar': 'Q42',
-			flat: 'Q1337',
+			"foo.bar": "Q42",
+			flat: "Q1337",
 		},
 	);
 
-	await t.test('empty yaml fails', () => {
+	await t.test("empty yaml fails", () => {
 		throws(() => {
-			resourceKeysFromYaml('');
+			resourceKeysFromYaml("");
 		});
 	});
 
-	await t.test('garbage input fails in yaml package', () => {
+	await t.test("garbage input fails in yaml package", () => {
 		throws(() => {
-			resourceKeysFromYaml(':');
+			resourceKeysFromYaml(":");
 		});
 	});
 });

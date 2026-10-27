@@ -1,11 +1,9 @@
-import {deepStrictEqual, ok, strictEqual} from 'node:assert';
-import {test} from 'node:test';
-import {type Context as BaseContext, Telegraf} from 'telegraf';
-import {
-	type MiddlewareProperty,
-	type Options,
-	TelegrafWikibase,
-} from './index.ts';
+import { deepStrictEqual, ok, strictEqual } from "node:assert";
+import { test } from "node:test";
+
+import { type Context as BaseContext, Telegraf } from "telegraf";
+
+import { type MiddlewareProperty, type Options, TelegrafWikibase } from "./index.ts";
 
 type Context = {
 	readonly wb: MiddlewareProperty;
@@ -16,48 +14,48 @@ type Context = {
 
 type MyContext = Context & BaseContext;
 
-await test('Telegraf', async t => {
-	await t.test('can be used as middleware', () => {
-		const bot = new Telegraf<MyContext>('123:ABC');
+await test("Telegraf", async (t) => {
+	await t.test("can be used as middleware", () => {
+		const bot = new Telegraf<MyContext>("123:ABC");
 		const entityStore = new Map();
 		(entityStore as any).ttlSupport = true;
-		const twb = new TelegrafWikibase({store: entityStore});
+		const twb = new TelegrafWikibase({ store: entityStore });
 		bot.use(twb.middleware());
 	});
 
-	const macro = async (
+	async function macro(
 		title: string,
 		options: Options,
 		pre: (ctx: Context) => Promise<void> | void,
 		env: (ctx: Context) => Promise<void> | void,
 		update: any = {},
-	) =>
-		t.test(title, async () => {
+	) {
+		await t.test(title, async () => {
 			const entityStore = new Map();
 			(entityStore as any).ttlSupport = true;
-			entityStore.set('Q5', {
-				type: 'item',
-				id: 'Q5',
+			entityStore.set("Q5", {
+				type: "item",
+				id: "Q5",
 			});
-			entityStore.set('Q2', {
-				type: 'item',
-				id: 'Q2',
+			entityStore.set("Q2", {
+				type: "item",
+				id: "Q2",
 				labels: {
-					de: 'Erde',
-					'de-ch': 'Erde',
-					en: 'earth',
+					de: "Erde",
+					"de-ch": "Erde",
+					en: "earth",
 				},
 			});
-			entityStore.set('Q146', {
-				type: 'item',
-				id: 'Q146',
+			entityStore.set("Q146", {
+				type: "item",
+				id: "Q146",
 				labels: {
-					de: 'Hauskatze',
-					en: 'house cat',
+					de: "Hauskatze",
+					en: "house cat",
 				},
 			});
 
-			const bot = new Telegraf<MyContext>('123:ABC');
+			const bot = new Telegraf<MyContext>("123:ABC");
 			(bot as any).botInfo = {};
 			bot.use(async (ctx, next) => {
 				ctx.session = {};
@@ -65,35 +63,36 @@ await test('Telegraf', async t => {
 				return next();
 			});
 
-			const twb = new TelegrafWikibase({store: entityStore, ...options});
-			twb.addResourceKeys({human: 'Q5', earth: 'Q2', cat: 'Q146'});
+			const twb = new TelegrafWikibase({ store: entityStore, ...options });
+			twb.addResourceKeys({ human: "Q5", earth: "Q2", cat: "Q146" });
 
 			bot.use(twb.middleware());
 
-			bot.use(async ctx => {
+			bot.use(async (ctx) => {
 				await env(ctx);
 			});
 
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			await bot.handleUpdate(update);
 		});
+	}
 
 	await macro(
-		'context has wb object',
+		"context has wb object",
 		{},
 		() => {},
-		ctx => {
+		(ctx) => {
 			ok(ctx.wb);
 		},
 	);
 
 	await macro(
-		'contextKey can be changed',
+		"contextKey can be changed",
 		{
-			contextKey: 'wd',
+			contextKey: "wd",
 		},
 		() => {},
-		ctx => {
+		(ctx) => {
 			ok(!ctx.wb);
 			// @ts-expect-error changed key but not in type
 			ok(ctx.wd);
@@ -101,159 +100,159 @@ await test('Telegraf', async t => {
 	);
 
 	await macro(
-		'fallback language is default language',
+		"fallback language is default language",
 		{},
 		() => {},
-		ctx => {
-			strictEqual(ctx.wb.locale(), 'en');
+		(ctx) => {
+			strictEqual(ctx.wb.locale(), "en");
 		},
 	);
 
 	await macro(
-		'language is read from ctx.from',
+		"language is read from ctx.from",
 		{},
 		() => {},
-		ctx => {
-			strictEqual(ctx.wb.locale(), 'de');
+		(ctx) => {
+			strictEqual(ctx.wb.locale(), "de");
 		},
-		{message: {from: {language_code: 'de'}}},
+		{ message: { from: { language_code: "de" } } },
 	);
 
 	await macro(
-		'language from ctx.from is saved on session',
+		"language from ctx.from is saved on session",
 		{},
 		() => {},
-		ctx => {
-			strictEqual(ctx.session?.__wikibase_language_code, 'de');
+		(ctx) => {
+			strictEqual(ctx.session?.__wikibase_language_code, "de");
 		},
-		{message: {from: {language_code: 'de'}}},
+		{ message: { from: { language_code: "de" } } },
 	);
 
 	await macro(
-		'language is read from session',
+		"language is read from session",
 		{},
-		ctx => {
-			ctx.session!.__wikibase_language_code = 'am';
+		(ctx) => {
+			ctx.session!.__wikibase_language_code = "am";
 		},
-		ctx => {
-			strictEqual(ctx.wb.locale(), 'am');
+		(ctx) => {
+			strictEqual(ctx.wb.locale(), "am");
 		},
-		{message: {from: {language_code: 'de'}}},
+		{ message: { from: { language_code: "de" } } },
 	);
 
 	await macro(
-		'language does not fail without session',
+		"language does not fail without session",
 		{},
-		ctx => {
+		(ctx) => {
 			delete ctx.session;
 		},
-		ctx => {
-			strictEqual(ctx.wb.locale(), 'de');
+		(ctx) => {
+			strictEqual(ctx.wb.locale(), "de");
 		},
-		{message: {from: {language_code: 'de'}}},
+		{ message: { from: { language_code: "de" } } },
 	);
 
 	await macro(
-		'locale can be set',
+		"locale can be set",
 		{},
 		() => {},
-		ctx => {
-			ctx.wb.locale('de');
-			strictEqual(ctx.session?.__wikibase_language_code, 'de');
-		},
-	);
-
-	await macro(
-		'get reader works',
-		{},
-		() => {},
-		async ctx => {
-			const reader = await ctx.wb.reader('human');
-			strictEqual(reader.label(), 'Q5');
+		(ctx) => {
+			ctx.wb.locale("de");
+			strictEqual(ctx.session?.__wikibase_language_code, "de");
 		},
 	);
 
 	await macro(
-		'localeProgress available',
+		"get reader works",
 		{},
 		() => {},
-		async ctx => {
-			strictEqual(await ctx.wb.localeProgress('de'), 2 / 3);
+		async (ctx) => {
+			const reader = await ctx.wb.reader("human");
+			strictEqual(reader.label(), "Q5");
 		},
 	);
 
 	await macro(
-		'localeProgress available sublanguage',
+		"localeProgress available",
 		{},
 		() => {},
-		async ctx => {
-			strictEqual(await ctx.wb.localeProgress('de-ch'), 2 / 3);
+		async (ctx) => {
+			strictEqual(await ctx.wb.localeProgress("de"), 2 / 3);
 		},
 	);
 
 	await macro(
-		'localeProgress available sublanguage but doesnt uses base-language',
+		"localeProgress available sublanguage",
 		{},
 		() => {},
-		async ctx => {
-			strictEqual(await ctx.wb.localeProgress('de-ch', false), 1 / 3);
+		async (ctx) => {
+			strictEqual(await ctx.wb.localeProgress("de-ch"), 2 / 3);
 		},
 	);
 
 	await macro(
-		'localeProgress unavailable is 0',
+		"localeProgress available sublanguage but doesnt uses base-language",
 		{},
 		() => {},
-		async ctx => {
-			strictEqual(await ctx.wb.localeProgress('am'), 0);
+		async (ctx) => {
+			strictEqual(await ctx.wb.localeProgress("de-ch", false), 1 / 3);
 		},
 	);
 
 	await macro(
-		'localeProgress of user',
+		"localeProgress unavailable is 0",
 		{},
 		() => {},
-		async ctx => {
-			strictEqual(ctx.wb.locale(), 'en', 'sanity check');
+		async (ctx) => {
+			strictEqual(await ctx.wb.localeProgress("am"), 0);
+		},
+	);
+
+	await macro(
+		"localeProgress of user",
+		{},
+		() => {},
+		async (ctx) => {
+			strictEqual(ctx.wb.locale(), "en", "sanity check");
 			strictEqual(await ctx.wb.localeProgress(), 2 / 3);
 		},
 	);
 
 	await macro(
-		'allLocaleProgress',
+		"allLocaleProgress",
 		{},
 		() => {},
-		async ctx => {
+		async (ctx) => {
 			deepStrictEqual(await ctx.wb.allLocaleProgress(), {
 				de: 2 / 3,
-				'de-ch': 1 / 3,
+				"de-ch": 1 / 3,
 				en: 2 / 3,
 			});
 		},
 	);
 
 	await macro(
-		'availableLocales',
+		"availableLocales",
 		{},
 		() => {},
-		async ctx => {
-			deepStrictEqual(await ctx.wb.availableLocales(), ['de', 'en']);
+		async (ctx) => {
+			deepStrictEqual(await ctx.wb.availableLocales(), ["de", "en"]);
 		},
 	);
 
 	await macro(
-		'availableLocales with high standards',
+		"availableLocales with high standards",
 		{},
 		() => {},
-		async ctx => {
+		async (ctx) => {
 			deepStrictEqual(await ctx.wb.availableLocales(1), []);
 		},
 	);
 
-	await t.test('availableLocales on class itself', async () => {
+	await t.test("availableLocales on class itself", async () => {
 		const entityStore = new Map();
 		(entityStore as any).ttlSupport = true;
-		const twb = new TelegrafWikibase({store: entityStore});
+		const twb = new TelegrafWikibase({ store: entityStore });
 		deepStrictEqual(await twb.availableLocales(), []);
 	});
 });
