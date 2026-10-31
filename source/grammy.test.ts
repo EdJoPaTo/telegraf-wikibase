@@ -88,9 +88,7 @@ await test("grammY", async (t) => {
 
 	await macro(
 		"contextKey can be changed",
-		{
-			contextKey: "wd",
-		},
+		{ contextKey: "wd" },
 		() => {},
 		(ctx) => {
 			ok(!ctx.wb);

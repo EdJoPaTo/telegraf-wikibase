@@ -88,9 +88,7 @@ await test("Telegraf", async (t) => {
 
 	await macro(
 		"contextKey can be changed",
-		{
-			contextKey: "wd",
-		},
+		{ contextKey: "wd" },
 		() => {},
 		(ctx) => {
 			ok(!ctx.wb);
